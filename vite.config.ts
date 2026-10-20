@@ -23,7 +23,8 @@ export default defineConfig({
         id: "/",
         name: "Malbuch",
         short_name: "Malbuch",
-        description: "Ausmalen ohne Übermalen: Malbuch für Kinder von 3 bis 8, offline auf dem Tablet.",
+        description:
+          "Ausmalen ohne Übermalen: Malbuch für Kinder von 3 bis 8, offline auf dem Tablet.",
         lang: "de",
         dir: "ltr",
         // accent-600 of the app's hue, as hex (#a71f65 is hue 355)
