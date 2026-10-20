@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1000" width="800" height="1000">
+  <!-- Roboter und Katze (from the prototype) -->
+  <g fill="#fff" stroke="#1E2238" stroke-width="7" stroke-linejoin="round" stroke-linecap="round">
+    <rect x="20" y="20" width="760" height="960" rx="28"/>
+    <path fill="none" d="M20 800 L780 800"/>
+    <rect x="50" y="60" width="110" height="110" rx="10"/>
+    <path fill="none" d="M105 60 L105 170 M50 115 L160 115"/>
+    <polygon points="78.0,74.0 81.5,83.1 91.3,83.7 83.7,89.9 86.2,99.3 78.0,94.0 69.8,99.3 72.3,89.9 64.7,83.7 74.5,83.1"/>
+    <path fill="none" d="M300 150 L300 108"/>
+    <circle cx="300" cy="90" r="18"/>
+    <rect x="180" y="210" width="30" height="60" rx="8"/>
+    <rect x="390" y="210" width="30" height="60" rx="8"/>
+    <rect x="200" y="150" width="200" height="160" rx="30"/>
+    <circle cx="255" cy="220" r="26"/>
+    <circle cx="345" cy="220" r="26"/>
+    <circle cx="255" cy="222" r="10" fill="#1E2238"/>
+    <circle cx="345" cy="222" r="10" fill="#1E2238"/>
+    <rect x="245" y="258" width="110" height="30" rx="10"/>
+    <path fill="none" d="M272 258 L272 288 M300 258 L300 288 M327 258 L327 288"/>
+    <rect x="270" y="305" width="60" height="30"/>
+    <rect x="130" y="360" width="50" height="170" rx="25"/>
+    <rect x="420" y="360" width="50" height="170" rx="25"/>
+    <circle cx="155" cy="555" r="28"/>
+    <circle cx="445" cy="555" r="28"/>
+    <rect x="215" y="595" width="55" height="150"/>
+    <rect x="330" y="595" width="55" height="150"/>
+    <rect x="170" y="330" width="260" height="270" rx="30"/>
+    <rect x="215" y="380" width="170" height="110" rx="14"/>
+    <circle cx="250" cy="435" r="18"/>
+    <circle cx="300" cy="435" r="18"/>
+    <circle cx="350" cy="435" r="18"/>
+    <rect x="215" y="515" width="170" height="50" rx="12"/>
+    <path fill="none" d="M255 515 L255 565 M300 515 L300 565 M345 515 L345 565"/>
+    <rect x="195" y="740" width="95" height="60" rx="20"/>
+    <rect x="310" y="740" width="95" height="60" rx="20"/>
+    <circle cx="95" cy="752" r="48"/>
+    <path fill="none" d="M62 718 Q96 758 70 796 M120 709 Q100 754 132 788"/>
+    <path d="M680 770 Q790 760 760 640 Q752 612 728 626 Q748 715 670 740 Z"/>
+    <ellipse cx="610" cy="705" rx="95" ry="95"/>
+    <ellipse cx="610" cy="725" rx="52" ry="62"/>
+    <ellipse cx="575" cy="798" rx="30" ry="15"/>
+    <ellipse cx="645" cy="798" rx="30" ry="15"/>
+    <polygon points="545,555 548,470 600,520"/>
+    <polygon points="675,555 672,470 620,520"/>
+    <circle cx="610" cy="575" r="78"/>
+    <circle cx="610" cy="664" r="12"/>
+    <ellipse cx="582" cy="566" rx="14" ry="19"/>
+    <ellipse cx="638" cy="566" rx="14" ry="19"/>
+    <ellipse cx="584" cy="569" rx="6" ry="11" fill="#1E2238"/>
+    <ellipse cx="640" cy="569" rx="6" ry="11" fill="#1E2238"/>
+    <polygon points="602,598 618,598 610,609" fill="#1E2238"/>
+    <path fill="none" d="M610 609 Q602 624 590 617 M610 609 Q618 624 630 617"/>
+    <path fill="none" d="M560 600 L512 590 M560 612 L510 616 M660 600 L708 590 M660 612 L710 616"/>
+    <path d="M500 320 Q500 250 625 250 Q750 250 750 320 Q750 390 640 390 L620 390 L590 455 L585 388 Q500 385 500 320 Z"/>
+    <text x="625" y="342" text-anchor="middle" font-size="60" font-weight="700" font-family="Arial, Helvetica, sans-serif" fill="#1E2238" stroke="none">Miau!</text>
+  </g>
+</svg>

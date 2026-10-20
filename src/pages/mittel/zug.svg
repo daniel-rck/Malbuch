@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1000" width="800" height="1000">
+  <!-- Zug -->
+  <g fill="#fff" stroke="#1E2238" stroke-width="7" stroke-linejoin="round" stroke-linecap="round">
+    <rect x="20" y="20" width="760" height="960" rx="28"/>
+    <path fill="none" d="M20 600 Q110 545 200 585 Q290 620 380 575 Q480 525 580 580 Q680 630 780 575"/>
+    <path fill="none" d="M216 145 L238 145"/>
+    <path fill="none" d="M193.7 198.7 L209.3 214.3"/>
+    <path fill="none" d="M140 221 L140 243"/>
+    <path fill="none" d="M86.3 198.7 L70.7 214.3"/>
+    <path fill="none" d="M64 145 L42 145"/>
+    <path fill="none" d="M86.3 91.3 L70.7 75.7"/>
+    <path fill="none" d="M140 69 L140 47"/>
+    <path fill="none" d="M193.7 91.3 L209.3 75.7"/>
+    <circle cx="140" cy="145" r="58"/>
+    <circle cx="120" cy="135" r="6" fill="#1E2238"/>
+    <circle cx="160" cy="135" r="6" fill="#1E2238"/>
+    <path fill="none" d="M115 162 Q140 182 165 162"/>
+    <path d="M250 290 A28 28 0 0 1 255 235 A30 30 0 0 1 300 195 A33 33 0 0 1 365 190 A32 32 0 0 1 420 222 A35 35 0 0 1 435 290 Z"/>
+    <path d="M420 365 A26 26 0 0 1 432 315 A27 27 0 0 1 475 282 A28 28 0 0 1 530 282 A27 27 0 0 1 572 315 A26 26 0 0 1 580 365 Z"/>
+    <path d="M555 435 A23 23 0 0 1 570 392 A24 24 0 0 1 612 368 A24 24 0 0 1 655 390 A24 24 0 0 1 670 435 Z"/>
+    <rect x="50" y="820" width="120" height="32"/>
+    <rect x="243" y="820" width="120" height="32"/>
+    <rect x="436" y="820" width="120" height="32"/>
+    <rect x="629" y="820" width="120" height="32"/>
+    <path fill="none" d="M20 820 L780 820"/>
+    <path fill="none" d="M90 935 L100 905 L110 935"/>
+    <path fill="none" d="M380 950 L390 920 L400 950"/>
+    <path fill="none" d="M640 930 L650 900 L660 930"/>
+    <circle cx="110" cy="585" r="50"/>
+    <circle cx="240" cy="585" r="50"/>
+    <circle cx="175" cy="560" r="54"/>
+    <path fill="none" d="M290 738 L360 738"/>
+    <polygon points="38,588 312,588 298,750 52,750"/>
+    <circle cx="110" cy="780" r="42"/>
+    <circle cx="110" cy="780" r="16"/>
+    <circle cx="240" cy="780" r="42"/>
+    <circle cx="240" cy="780" r="16"/>
+    <path d="M530 575 Q530 522 557 522 Q584 522 584 575 Z"/>
+    <polygon points="628,576 664,576 676,500 696,470 596,470 616,500"/>
+    <rect x="490" y="568" width="200" height="152"/>
+    <path fill="none" d="M598 568 L598 720"/>
+    <ellipse cx="692" cy="644" rx="26" ry="76"/>
+    <rect x="355" y="472" width="150" height="253"/>
+    <rect x="340" y="450" width="182" height="38" rx="14"/>
+    <rect x="383" y="512" width="94" height="84" rx="12"/>
+    <polygon points="696,745 724,745 754,796 692,796"/>
+    <rect x="340" y="715" width="380" height="40" rx="10"/>
+    <circle cx="425" cy="766" r="56"/>
+    <circle cx="425" cy="766" r="18"/>
+    <circle cx="590" cy="766" r="56"/>
+    <circle cx="590" cy="766" r="18"/>
+  </g>
+</svg>

@@ -1,5 +1,9 @@
-node_modules
-dist
-dev-dist
-*.log
-.DS_Store
+{
+  "files": [],
+  "references": [
+    { "path": "./tsconfig.app.json" },
+    { "path": "./tsconfig.node.json" },
+    { "path": "./tsconfig.sw.json" },
+    { "path": "./tsconfig.worker.json" }
+  ]
+}
