@@ -3,24 +3,26 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "description": "",
+  "description": "Ausmalen ohne Übermalen: eine Malbuch-App für Kinder, offline auf dem Tablet.",
   "keywords": [
     "pwa",
     "privacy",
     "offline",
     "react",
     "vite",
-    "typescript"
+    "typescript",
+    "kids",
+    "coloring"
   ],
-  "author": "",
+  "author": "daniel-rck",
   "license": "MIT",
   "homepage": "https://malbuch.daniel-rck.workers.dev",
   "repository": {
     "type": "git",
-    "url": "https://github.com/daniel-rck/malbuch.git"
+    "url": "https://github.com/daniel-rck/Malbuch.git"
   },
   "bugs": {
-    "url": "https://github.com/daniel-rck/malbuch/issues"
+    "url": "https://github.com/daniel-rck/Malbuch/issues"
   },
   "packageManager": "bun@1.4.2",
   "scripts": {
@@ -32,6 +34,7 @@
     "typecheck": "tsc -b --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
+    "check:pages": "bun scripts/check-pages.ts",
     "worker:dev": "wrangler dev",
     "worker:deploy": "wrangler deploy"
   },

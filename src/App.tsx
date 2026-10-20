@@ -1,18 +1,9 @@
-import { House } from "lucide-react";
-import { Outlet, ScrollRestoration } from "react-router-dom";
-import { ROUTES } from "./lib/routes.ts";
-import { AppShell, type NavItem } from "./lib/ui/index.ts";
+import { Outlet } from "react-router-dom";
 
-const NAV_ITEMS: NavItem[] = [
-  { to: ROUTES.home, label: "Start", icon: <House className="h-5 w-5" /> },
-];
-
-/** The root layout route: the shell around every page. */
+/**
+ * The root layout route. Malbuch shows no app shell: children can't read, so
+ * the paint page is the whole screen (see docs/specs/malbuch.md §7).
+ */
 export function App() {
-  return (
-    <AppShell title="malbuch" navItems={NAV_ITEMS}>
-      <Outlet />
-      <ScrollRestoration />
-    </AppShell>
-  );
+  return <Outlet />;
 }

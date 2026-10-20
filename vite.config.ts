@@ -12,7 +12,7 @@ export default defineConfig({
       strategies: "injectManifest",
       srcDir: "src/sw",
       filename: "index.ts",
-      // A new version waits for the user's go (UpdatePrompt); see src/sw/base.ts.
+      // A new version waits for the user's go (the reload icon in the top bar); see src/sw/base.ts.
       registerType: "prompt",
       injectRegister: "auto",
       injectManifest: {
@@ -21,15 +21,18 @@ export default defineConfig({
       devOptions: { enabled: false, type: "module" },
       manifest: {
         id: "/",
-        name: "malbuch",
-        short_name: "malbuch",
-        description: "<one-line German description>",
+        name: "Malbuch",
+        short_name: "Malbuch",
+        description: "Ausmalen ohne Übermalen: Malbuch für Kinder von 3 bis 8, offline auf dem Tablet.",
         lang: "de",
         dir: "ltr",
         // accent-600 of the app's hue, as hex (#a71f65 is hue 355)
         theme_color: "#a71f65",
-        background_color: "#ffffff",
-        display: "standalone",
+        // The splash screen in the sky blue of the app.
+        background_color: "#bfe0ff",
+        // Children paint on the whole screen: no browser bars, any orientation.
+        display: "fullscreen",
+        orientation: "any",
         start_url: "/",
         scope: "/",
         icons: [
