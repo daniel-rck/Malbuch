@@ -75,6 +75,7 @@ export function Paper({ onSession }: { onSession: (session: Session | null) => v
           ...(loaded.snapshot ? { snapshot: loaded.snapshot } : {}),
         });
         loaded.snapshot?.image.close();
+        canvas.warmUp();
         const autosave = new Autosave({
           pageId: page.id,
           labelsKey: loaded.labelsKey,

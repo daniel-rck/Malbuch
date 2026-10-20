@@ -16,7 +16,7 @@ export class MaskCache {
   readonly #entries = new Map<number, MaskCanvas>();
   #area = 0;
 
-  constructor(regions: Regions, maxArea = 4_000_000) {
+  constructor(regions: Regions, maxArea = 6_000_000) {
     this.#regions = regions;
     this.#maxArea = maxArea;
   }

@@ -68,6 +68,7 @@ export class PageCanvas {
   /** The paint before the last clear, so undoing it is exact by construction. */
   #pinned: Held | null = null;
   #active: Active | null = null;
+  #warm: { canvas: HTMLCanvasElement; handle: number } | null = null;
   #frame = 0;
   #version = 0;
   readonly #listeners = new Set<() => void>();
@@ -185,6 +186,8 @@ export class PageCanvas {
 
   undo(): boolean {
     if (!this.canUndo) return false;
+    // The replay below leaves the checkpoints it passes; a rebuild in progress is moot.
+    this.#stopWarmUp();
     this.#ops.pop();
     const target = this.#ops.length;
     this.#checkpoints = this.#checkpoints.filter((c) => {
@@ -212,6 +215,7 @@ export class PageCanvas {
   }
 
   dispose(): void {
+    this.#stopWarmUp();
     cancelAnimationFrame(this.#frame);
     this.#listeners.clear();
     releaseCanvas(this.#stroke.canvas);
@@ -258,13 +262,13 @@ export class PageCanvas {
     if (box) composeMasked(this.#live, this.#stroke.canvas, active.mask, box);
   }
 
-  /** stroke ∩ mask onto paint, then clean live and stroke — for live and replay alike. */
-  #finishPen(op: StrokeOp, mask: MaskCanvas | null): void {
+  /** stroke ∩ mask onto `target`, then clean live and stroke — for live and replay alike. */
+  #finishPen(op: StrokeOp, mask: MaskCanvas | null, target = this.#paint): void {
     const box = strokeRasterBox(op.pts, op.size);
-    const target = mask ? intersect(box, maskBox(mask)) : box;
-    if (target) {
-      composeMasked(this.#live, this.#stroke.canvas, mask, target);
-      commitBox(this.#paint, this.#live, this.#stroke, target);
+    const clipped = mask ? intersect(box, maskBox(mask)) : box;
+    if (clipped) {
+      composeMasked(this.#live, this.#stroke.canvas, mask, clipped);
+      commitBox(target, this.#live, this.#stroke, clipped);
     }
     if (box) {
       this.#live.clearRect(box.x, box.y, box.w, box.h);
@@ -272,27 +276,30 @@ export class PageCanvas {
     }
   }
 
-  /** Apply one op to the paint canvas (replay, fills, clears). */
-  #apply(op: Op): void {
+  /**
+   * Apply one op to `target` (the paint canvas, or a checkpoint being rebuilt).
+   * Live and stroke serve as scratch and are clean again afterwards.
+   */
+  #apply(op: Op, target = this.#paint): void {
     switch (op.t) {
       case "clear":
-        this.#paint.clearRect(0, 0, RASTER_W, RASTER_H);
+        target.clearRect(0, 0, RASTER_W, RASTER_H);
         return;
       case "erase":
-        drawSegments(this.#paint, op.pts, 0, op.size * ERASER_FACTOR, "#000", "destination-out");
+        drawSegments(target, op.pts, 0, op.size * ERASER_FACTOR, "#000", "destination-out");
         return;
       case "fill": {
         const mask = this.#masks.get(op.region);
         const box = maskBox(mask);
         fillBox(this.#stroke, box, op.color);
         composeMasked(this.#live, this.#stroke.canvas, mask, box);
-        commitBox(this.#paint, this.#live, this.#stroke, box);
+        commitBox(target, this.#live, this.#stroke, box);
         return;
       }
       case "stroke": {
         const mask = op.region === null ? null : this.#masks.get(op.region);
         drawSegments(this.#stroke, op.pts, 0, op.size, op.color, "source-over");
-        this.#finishPen(op, mask);
+        this.#finishPen(op, mask, target);
       }
     }
   }
@@ -336,38 +343,112 @@ export class PageCanvas {
    * checkpoint boundaries, so a long replay leaves checkpoints behind.
    */
   #replayTo(target: number): void {
+    let at = this.#restoreNearest(this.#paint, target);
+    for (let b = nextBoundary(at); b <= target; b += CHECKPOINT_EVERY) {
+      for (const op of this.#segment(at, b)) this.#apply(op, this.#paint);
+      at = b;
+      this.#hold(b, this.#paint.canvas);
+    }
+    if (at < target) for (const op of this.#segment(at, target)) this.#apply(op, this.#paint);
+  }
+
+  /** Put the latest state at or before `target` that needs no replay onto `ctx`; returns its op count. */
+  #restoreNearest(ctx: CanvasRenderingContext2D, target: number): number {
     const held = [...this.#checkpoints, ...(this.#pinned ? [this.#pinned] : [])];
     const starts: ReplayStart[] = held.map(({ at, key }) => ({ at, key }));
     const { start } = planReplay(this.#ops, target, starts);
-    if (start.key === "base") this.#restoreBase();
-    else if (start.key === "blank") this.#paint.clearRect(0, 0, RASTER_W, RASTER_H);
-    else {
+    if (start.key === "base") {
+      if (this.#base) copyCanvas(ctx, this.#base);
+      else ctx.clearRect(0, 0, RASTER_W, RASTER_H);
+    } else if (start.key === "blank") {
+      ctx.clearRect(0, 0, RASTER_W, RASTER_H);
+    } else {
       const from = held.find((h) => h.key === start.key);
-      if (from) copyCanvas(this.#paint, from.canvas);
+      if (from) copyCanvas(ctx, from.canvas);
     }
-    let at = start.at;
-    const step = (to: number) => {
-      const plan = planReplay(this.#ops, to, [{ at, key: "current" }]);
-      if (plan.start.key === "blank") this.#paint.clearRect(0, 0, RASTER_W, RASTER_H);
-      for (const i of plan.steps) {
-        const op = this.#ops[i];
-        if (op) this.#apply(op);
-      }
-      at = to;
-    };
-    for (
-      let b = (Math.floor(at / CHECKPOINT_EVERY) + 1) * CHECKPOINT_EVERY;
-      b <= target;
-      b += CHECKPOINT_EVERY
-    ) {
-      step(b);
-      this.#hold(b, this.#paint.canvas);
-    }
-    if (at < target) step(target);
+    return start.at;
   }
 
-  #restoreBase(): void {
-    if (this.#base) copyCanvas(this.#paint, this.#base);
-    else this.#paint.clearRect(0, 0, RASTER_W, RASTER_H);
+  /** The ops taking the state after `from` ops to the state after `to` (a clear in between included). */
+  #segment(from: number, to: number): Op[] {
+    const plan = planReplay(this.#ops, to, [{ at: from, key: "current" }]);
+    const ops = plan.steps.flatMap((i) => this.#ops[i] ?? []);
+    return plan.start.key === "blank" ? [{ t: "clear" }, ...ops] : ops;
   }
+
+  /**
+   * After a page opened from its stored snapshot no checkpoint lies below
+   * it, so the first undo would replay the whole log. Rebuild the missing
+   * checkpoints in idle time, a few ops per slice, never during a stroke.
+   */
+  warmUp(): void {
+    this.#stopWarmUp();
+    const length = this.#ops.length;
+    const top = Math.floor((length - 1) / CHECKPOINT_EVERY) * CHECKPOINT_EVERY;
+    const wanted: number[] = [];
+    for (
+      let b = top;
+      b >= CHECKPOINT_EVERY && wanted.length < MAX_CHECKPOINTS;
+      b -= CHECKPOINT_EVERY
+    ) {
+      wanted.unshift(b);
+    }
+    const missing = wanted.filter((b) => !this.#checkpoints.some((c) => c.at === b));
+    const last = missing.at(-1);
+    if (last === undefined) return;
+    const canvas = this.#spare.pop() ?? createCanvas(RASTER_W, RASTER_H);
+    const ctx = context2d(canvas);
+    let at = this.#restoreNearest(ctx, missing[0] ?? last);
+    let queue: Op[] = [];
+    let next = nextBoundary(at);
+    const run = (deadline: () => number) => {
+      if (this.#warm?.canvas !== canvas) return;
+      if (!this.#active) {
+        while (deadline() > 2) {
+          if (queue.length === 0) {
+            if (at > 0 && missing.includes(at)) this.#hold(at, canvas);
+            if (at >= last) {
+              this.#stopWarmUp();
+              return;
+            }
+            queue = this.#segment(at, next);
+            at = next;
+            next += CHECKPOINT_EVERY;
+            continue;
+          }
+          const op = queue.shift();
+          if (op) this.#apply(op, ctx);
+        }
+      }
+      if (this.#warm) this.#warm.handle = whenIdle(run);
+    };
+    this.#warm = { canvas, handle: whenIdle(run) };
+  }
+
+  #stopWarmUp(): void {
+    if (!this.#warm) return;
+    cancelIdle(this.#warm.handle);
+    this.#spare.push(this.#warm.canvas);
+    this.#warm = null;
+  }
+}
+
+function nextBoundary(at: number): number {
+  return (Math.floor(at / CHECKPOINT_EVERY) + 1) * CHECKPOINT_EVERY;
+}
+
+/** requestIdleCallback where there is one (not in Safari), else a short timeout. */
+function whenIdle(run: (timeLeft: () => number) => void): number {
+  if (typeof requestIdleCallback === "function") {
+    return requestIdleCallback((d) => run(() => d.timeRemaining()), { timeout: 500 });
+  }
+  return window.setTimeout(() => {
+    const end = performance.now() + 8;
+    run(() => end - performance.now());
+  }, 50);
+}
+
+function cancelIdle(handle: number): void {
+  if (typeof cancelIdleCallback === "function") cancelIdleCallback(handle);
+  clearTimeout(handle);
 }
