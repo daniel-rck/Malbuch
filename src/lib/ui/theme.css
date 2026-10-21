@@ -28,6 +28,62 @@
   --color-line: #1e2238;
 }
 
+/* Stickers and surprises (spec §3.3): a tap wiggles, new things twinkle, a
+ * won sticker pops in among confetti. Reduced motion collapses all of these
+ * (tokens.css); the celebration then also leaves the confetti out. */
+@theme {
+  --animate-wiggle: wiggle 0.5s ease-in-out;
+  --animate-twinkle: twinkle 1.8s ease-in-out infinite;
+  --animate-pop: pop 0.55s cubic-bezier(0.2, 1.6, 0.4, 1) both;
+  --animate-confetti: confetti 1.5s cubic-bezier(0.2, 0.7, 0.4, 1) both;
+
+  @keyframes wiggle {
+    0%,
+    100% {
+      transform: rotate(0);
+    }
+    20% {
+      transform: rotate(-12deg) scale(1.08);
+    }
+    45% {
+      transform: rotate(10deg) scale(1.08);
+    }
+    70% {
+      transform: rotate(-6deg);
+    }
+  }
+  @keyframes twinkle {
+    0%,
+    100% {
+      transform: scale(1) rotate(0);
+    }
+    50% {
+      transform: scale(0.7) rotate(45deg);
+    }
+  }
+  @keyframes pop {
+    0% {
+      transform: scale(0) rotate(-20deg);
+    }
+    100% {
+      transform: scale(1) rotate(0);
+    }
+  }
+  @keyframes confetti {
+    0% {
+      transform: translate(0, 0) rotate(0);
+      opacity: 1;
+    }
+    80% {
+      opacity: 1;
+    }
+    100% {
+      transform: translate(var(--dx), var(--dy)) rotate(var(--rot));
+      opacity: 0;
+    }
+  }
+}
+
 /* Dark: the same two places as tokens.css — following the OS unless the root
  * forces light, and forced dark. */
 @media (prefers-color-scheme: dark) {

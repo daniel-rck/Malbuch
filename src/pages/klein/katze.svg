@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1000" width="800" height="1000">
+  <!-- Katze -->
+  <g fill="#fff" stroke="#1E2238" stroke-width="8" stroke-linejoin="round" stroke-linecap="round">
+    <rect x="20" y="20" width="760" height="960" rx="60"/>
+    <path d="M20 800 Q67.5 782 115 800 Q162.5 818 210 800 Q257.5 782 305 800 Q352.5 818 400 800 Q447.5 782 495 800 Q542.5 818 590 800 Q637.5 782 685 800 Q732.5 818 780 800 L780 920 A60 60 0 0 1 720 980 L80 980 A60 60 0 0 1 20 920 Z"/>
+    <path d="M540 700 C640 720 700 640 690 540 C684 470 640 440 615 470 C600 490 625 505 632 540 C645 610 610 650 545 640 Z"/>
+    <ellipse cx="400" cy="640" rx="190" ry="165"/>
+    <ellipse cx="400" cy="670" rx="95" ry="115"/>
+    <polygon points="250,320 262,140 390,225"/>
+    <polygon points="410,225 538,140 550,320"/>
+    <circle cx="400" cy="370" r="150"/>
+    <circle cx="345" cy="350" r="20" fill="#1E2238"/>
+    <circle cx="338" cy="342" r="6" fill="#fff" stroke="none"/>
+    <circle cx="455" cy="350" r="20" fill="#1E2238"/>
+    <circle cx="448" cy="342" r="6" fill="#fff" stroke="none"/>
+    <polygon fill="#1E2238" points="382,405 418,405 400,428"/>
+    <path fill="none" d="M400 428 L400 445 M400 445 Q378 470 360 452 M400 445 Q422 470 440 452"/>
+    <path fill="none" d="M330 420 L230 405 M330 438 L235 450 M470 420 L570 405 M470 438 L565 450"/>
+    <ellipse cx="337" cy="795" rx="68" ry="40"/>
+    <ellipse cx="463" cy="795" rx="68" ry="40"/>
+    <circle cx="645" cy="845" r="80"/>
+    <path fill="none" d="M575 805 Q650 830 700 780 M568 860 Q650 880 722 830"/>
+  </g>
+</svg>

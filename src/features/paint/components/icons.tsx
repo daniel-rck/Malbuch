@@ -99,3 +99,36 @@ export function AgeIcon({ group }: { group: GroupId }) {
     </Icon>
   );
 }
+
+/** A wrapped present: a surprise page not open yet. */
+export const GiftIcon = () => (
+  <Icon width={2.2}>
+    <rect x="3.5" y="9" width="17" height="11.5" rx="1.5" />
+    <rect x="2.5" y="6" width="19" height="4" rx="1" />
+    <path d="M12 6v14.5" />
+    <path d="M12 6C10.5 2.5 6 2.5 7 5c.4 1 2.5 1 5 1zM12 6c1.5-3.5 6-3.5 5-1-.4 1-2.5 1-5 1z" />
+  </Icon>
+);
+
+/** "Stickerheft": a star sticker with a peeled corner. */
+export const StickerIcon = () => (
+  <Icon width={2.2}>
+    <path d="M12 3.2l2.6 5.3 5.8.8-4.2 4.1 1 5.8L12 16.5l-5.2 2.7 1-5.8L3.6 9.3l5.8-.8z" />
+    <path d="M14.5 14.6l1.2 1.4" />
+  </Icon>
+);
+
+/** Four-pointed sparkle: something new is waiting. Filled, sun-yellow by default. */
+export function Sparkle({ className = "" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" className={className}>
+      <path
+        d="M12 1.5c.9 5.4 3.6 8.4 10.5 10.5-6.9 2.1-9.6 5.1-10.5 10.5C11.1 17.1 8.4 14.1 1.5 12 8.4 9.9 11.1 6.9 12 1.5z"
+        fill="var(--color-sun)"
+        stroke="var(--color-line)"
+        strokeWidth="1.5"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}

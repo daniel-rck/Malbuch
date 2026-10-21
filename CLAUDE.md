@@ -29,8 +29,10 @@ bunx github:daniel-rck/web-base#v0.6.0 check --strict
   `check --strict` installiert und wird **nicht** importiert: sie zeigt Text, Malbuch nicht.
 - UI ohne Text: Icons, Kleckse, Punktgrößen; deutscher Text nur in `aria-label`. Bedienelemente
   ≥ 48 px. Code, Kommentare und Commits auf Englisch (Conventional Commits).
-- `src/features/paint/engine/` bleibt reines TS ohne DOM und vollständig getestet.
+- `src/features/paint/engine/` und `src/features/rewards/engine/` bleiben reines TS ohne DOM und
+  vollständig getestet.
 - Live-Zeichnen und Replay gehen durch dieselben Funktionen in `render/draw.ts` — sonst ist
   Undo nicht mehr pixelgleich.
-- Neue Ausmalbilder: Konvention in Spec §6, `src/pages/meta.ts` ergänzen,
+- Neue Ausmalbilder: Konvention in Spec §6, `src/pages/meta.ts` ergänzen (Überraschungsbilder
+  mit `unlockDay`, je Gruppe eins pro Tag 1–7),
   `bun run check:pages`, dann Flächen auf `/dev/seiten?seite=<id>` (Dev-Server) prüfen.

@@ -1,6 +1,7 @@
 import type { DBSchema, OpenDBCallbacks } from "idb";
 import type { Tool } from "../../features/paint/config.ts";
 import type { Op } from "../../features/paint/engine/ops.ts";
+import type { Progress } from "../../features/rewards/engine/progress.ts";
 import { clearStores } from "./mutations.ts";
 import { createDBOpener } from "./open.ts";
 
@@ -61,12 +62,16 @@ export type LabelsRecord = {
 
 export type Settings = { id: "settings"; tool: Tool; color: string; size: number; pageId: string };
 
+/** Stickers, painting days and opened surprise pages (spec §3.2–3.3), one row. */
+export type ProgressRecord = Progress & { id: "progress" };
+
 export interface AppSchema extends DBSchema {
   ops: { key: string; value: OpsRecord };
   previews: { key: string; value: PreviewRecord };
   thumbs: { key: string; value: ThumbRecord };
   labels: { key: string; value: LabelsRecord; indexes: { byPage: string } };
   settings: { key: string; value: Settings };
+  progress: { key: string; value: ProgressRecord };
 }
 
 /** A v1 preview: the thumbnail still inline. */
@@ -95,13 +100,17 @@ export const upgrade: OpenDBCallbacks<AppSchema>["upgrade"] = (db, oldVersion, _
         }
       });
   }
+  if (oldVersion < 3) {
+    // Rewards. The first start after the upgrade fills it from the op logs.
+    db.createObjectStore("progress", { keyPath: "id" });
+  }
 };
 
 export const getDB = createDBOpener<AppSchema>({
   // Unique per app: in local dev every app shares the localhost origin, so two
   // apps with the same name would share (and upgrade) one database.
   name: "malbuch",
-  version: 2,
+  version: 3,
   upgrade,
 });
 

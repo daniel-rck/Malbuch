@@ -100,7 +100,7 @@ export function Paper({ onSession }: { onSession: (session: Session | null) => v
           masks.dispose();
           loaded.base?.image.close();
         };
-        publish({ page, canvas, autosave, paint });
+        publish({ page, canvas, autosave, paint, regions: loaded.regions });
       })
       .catch((error: unknown) => console.error("Malbuch: could not open the page", error));
     return () => {
