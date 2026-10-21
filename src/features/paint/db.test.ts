@@ -55,7 +55,14 @@ describe("paint storage", () => {
 
   it("writes a preview and its thumbnail together, and deletes both", async () => {
     const thumb = new Uint8Array([1, 2, 3]).buffer;
-    const record = { id: "fisch", png: new ArrayBuffer(4), opCount: 0, digest: "x", updatedAt: 1 };
+    const record = {
+      id: "fisch",
+      labelsKey: "k",
+      png: new ArrayBuffer(4),
+      opCount: 0,
+      digest: "x",
+      updatedAt: 1,
+    };
     await savePreview(record, thumb);
     const thumbs = await loadThumbs();
     expect(thumbs.map((t) => [t.id, t.digest])).toEqual([["fisch", "x"]]);

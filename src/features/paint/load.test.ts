@@ -30,10 +30,11 @@ const regions = labelRegions(art.darkness, art.width, art.height, 110);
 const red: Op = { t: "fill", color: "#E53935", region: 1 };
 const blue: Op = { t: "fill", color: "#1E88E5", region: 1 };
 
-async function preview(ops: Op[], opCount: number) {
+async function preview(ops: Op[], opCount: number, labelsKey = key) {
   await savePreview(
     {
       id: "drache",
+      labelsKey,
       png: new Uint8Array([opCount]).buffer,
       opCount,
       digest: opsDigest(ops, opCount),
@@ -83,7 +84,7 @@ describe("loadPage", () => {
   it("keeps the old log and its preview while the start image can't be stored", async () => {
     const old = "drache:old-art:v1:s1.5";
     await saveOps({ id: "drache", labelsKey: old, ops: [red], updatedAt: 1 });
-    await preview([red], 1);
+    await preview([red], 1, old);
     vi.mocked(saveOps).mockResolvedValueOnce(false);
     const loaded = await loadPage(page);
     // The picture still shows (the preview became the start image) …
@@ -91,6 +92,13 @@ describe("loadPage", () => {
     // … and nothing it was made from is gone, so the next start tries again.
     expect((await loadOps("drache"))?.labelsKey).toBe(old);
     expect(await loadPreview("drache")).toBeDefined();
+  });
+
+  it("never takes a snapshot painted on other labels, even for the same ops", async () => {
+    // A failed migration left the old preview; the new log then repeats its op.
+    await preview([red], 1, "drache:old-art:v1:s1.5");
+    await saveOps({ id: "drache", labelsKey: key, ops: [red], updatedAt: 2 });
+    expect((await loadPage(page)).snapshot).toBeNull();
   });
 
   it("reads the op log once more, and fails rather than open the page empty", async () => {

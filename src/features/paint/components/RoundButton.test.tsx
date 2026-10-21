@@ -18,9 +18,14 @@ beforeAll(() => {
     configurable: true,
     value: () => false,
   });
+  Object.defineProperty(Element.prototype, "releasePointerCapture", {
+    configurable: true,
+    value: () => {},
+  });
 });
 afterAll(() => {
   Reflect.deleteProperty(Element.prototype, "hasPointerCapture");
+  Reflect.deleteProperty(Element.prototype, "releasePointerCapture");
 });
 beforeEach(() => vi.useFakeTimers());
 afterEach(() => vi.useRealTimers());
@@ -41,25 +46,39 @@ describe("RoundButton", () => {
     expect(onClick).not.toHaveBeenCalled();
   });
 
-  it("with hold, fires once the finger stayed long enough", () => {
+  it("with hold, fires on release once the finger stayed long enough", () => {
     const { onClick, button } = renderButton({ hold: true });
     fireEvent.pointerDown(button);
     vi.advanceTimersByTime(HOLD_MS - 1);
-    expect(onClick).not.toHaveBeenCalled();
-    vi.advanceTimersByTime(1);
-    expect(onClick).toHaveBeenCalledTimes(1);
     fireEvent.pointerUp(button);
+    expect(onClick).not.toHaveBeenCalled();
+    fireEvent.pointerDown(button);
+    vi.advanceTimersByTime(HOLD_MS);
+    // Not while held: the release is the gesture that may open the share sheet.
+    expect(onClick).not.toHaveBeenCalled();
+    fireEvent.pointerUp(button);
+    expect(onClick).toHaveBeenCalledTimes(1);
     fireEvent.click(button, { detail: 1 });
     expect(onClick).toHaveBeenCalledTimes(1);
   });
 
-  it("with hold, lets go when the finger slides off early", () => {
+  it("with hold, lets go when the finger slides off", () => {
     const { onClick, button } = renderButton({ hold: true });
     fireEvent.pointerDown(button);
-    vi.advanceTimersByTime(HOLD_MS / 2);
-    fireEvent.pointerLeave(button);
     vi.advanceTimersByTime(2 * HOLD_MS);
+    fireEvent.pointerLeave(button);
+    fireEvent.pointerUp(button);
     expect(onClick).not.toHaveBeenCalled();
+  });
+
+  it("with hold, frees the pointer from the icon a touch landed on", () => {
+    const { button } = renderButton({ hold: true });
+    const icon = button.querySelector("span");
+    if (!icon) throw new Error("no icon");
+    vi.spyOn(icon, "hasPointerCapture").mockReturnValue(true);
+    const release = vi.spyOn(icon, "releasePointerCapture");
+    fireEvent.pointerDown(icon, { pointerId: 3 });
+    expect(release).toHaveBeenCalledTimes(1);
   });
 
   it("with hold, still fires at once for keyboards and screen readers", () => {

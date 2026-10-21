@@ -51,6 +51,23 @@ describe("Autosave.flush", () => {
     autosave.dispose();
   });
 
+  it("waits for a write in flight and retries it when it failed", async () => {
+    // The 400-ms write already started when the page switch flushes.
+    vi.useFakeTimers();
+    const write: { resolve?: (ok: boolean) => void } = {};
+    vi.mocked(saveOps).mockReturnValueOnce(new Promise((resolve) => (write.resolve = resolve)));
+    const { autosave } = setup();
+    autosave.changed();
+    await vi.advanceTimersByTimeAsync(400);
+    expect(saveOps).toHaveBeenCalledTimes(1);
+    const done = autosave.flush();
+    autosave.dispose();
+    vi.useRealTimers();
+    write.resolve?.(false);
+    await done;
+    expect(saveOps).toHaveBeenCalledTimes(2);
+  });
+
   it("writes the op log again after a failed write", async () => {
     vi.mocked(saveOps).mockResolvedValueOnce(false);
     const { autosave } = setup();

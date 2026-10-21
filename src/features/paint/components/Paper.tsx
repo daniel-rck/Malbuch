@@ -86,8 +86,9 @@ export function Paper({ onSession }: { onSession: (session: Session | null) => v
           paint,
           previewDigest,
         });
-        // Replayed beyond the stored preview: store this state for a fast next start.
-        if (!previewDigest && loaded.ops.length > 0) autosave.schedulePreview();
+        // Replayed beyond the stored preview, or a fresh start image after an
+        // art change: store this state for a fast next start and the thumbnail.
+        if (!previewDigest && (loaded.ops.length > 0 || loaded.base)) autosave.schedulePreview();
         const unsubscribe = canvas.subscribe(() => autosave.changed());
         teardown = () => {
           // flush() reads the paint canvas before it awaits anything, so it

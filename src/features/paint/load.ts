@@ -80,6 +80,7 @@ export async function loadPage(page: Page): Promise<LoadedPage> {
   let snapshot: LoadedPage["snapshot"] = null;
   if (
     preview &&
+    preview.labelsKey === labelsKey &&
     preview.opCount <= ops.length &&
     preview.digest === opsDigest(ops, preview.opCount)
   ) {

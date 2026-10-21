@@ -6,9 +6,9 @@ export const HOLD_MS = 700;
 /**
  * A round, icon-only action in the top bar (52 px, prototype style; 48 on
  * phones). With `hold`, a tap does nothing: the finger has to stay on it
- * while a sun-yellow ring fills (spec §3) — a stray tap of a small child
- * neither wipes the picture nor opens the share sheet. Keyboards and screen
- * readers (a click without a pointer) still trigger it at once.
+ * until a sun-yellow ring has filled, then lift (spec §3) — a stray tap of a
+ * small child neither wipes the picture nor opens the share sheet. Keyboards
+ * and screen readers (a click without a pointer) still trigger it at once.
  */
 export function RoundButton(props: {
   label: string;
@@ -18,25 +18,30 @@ export function RoundButton(props: {
   children: ReactNode;
 }) {
   const [holding, setHolding] = useState(false);
+  const armed = useRef(false);
   const timer = useRef<number | undefined>(undefined);
   useEffect(() => () => clearTimeout(timer.current), []);
 
-  const release = () => {
+  const cancel = () => {
     clearTimeout(timer.current);
+    armed.current = false;
     setHolding(false);
   };
   const press = (e: PointerEvent<HTMLButtonElement>) => {
     if (props.disabled || (e.pointerType === "mouse" && e.button !== 0)) return;
-    // Without the implicit touch capture, sliding off the button lets go of it.
-    if (e.currentTarget.hasPointerCapture(e.pointerId)) {
-      e.currentTarget.releasePointerCapture(e.pointerId);
-    }
-    release();
+    // Touch captures the pointer to whatever is under the finger, often the
+    // icon: release it, so sliding off the button lets go of it.
+    const target = e.target as Element;
+    if (target.hasPointerCapture(e.pointerId)) target.releasePointerCapture(e.pointerId);
+    cancel();
     setHolding(true);
-    timer.current = window.setTimeout(() => {
-      setHolding(false);
-      props.onClick();
-    }, HOLD_MS);
+    timer.current = window.setTimeout(() => (armed.current = true), HOLD_MS);
+  };
+  // It fires on release: for touch, that is the user gesture the share sheet needs.
+  const lift = () => {
+    const fire = armed.current && !props.disabled;
+    cancel();
+    if (fire) props.onClick();
   };
 
   return (
@@ -50,9 +55,9 @@ export function RoundButton(props: {
       }}
       {...(props.hold && {
         onPointerDown: press,
-        onPointerUp: release,
-        onPointerLeave: release,
-        onPointerCancel: release,
+        onPointerUp: lift,
+        onPointerLeave: cancel,
+        onPointerCancel: cancel,
         onContextMenu: (e) => e.preventDefault(),
       })}
       className="relative grid size-[52px] shrink-0 cursor-pointer place-items-center rounded-full bg-tray text-on-tray shadow-[0_4px_0_var(--color-shade)] compact:size-12 active:translate-y-0.5 active:shadow-[0_2px_0_var(--color-shade)] disabled:cursor-default disabled:opacity-40"

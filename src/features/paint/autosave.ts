@@ -21,6 +21,8 @@ export class Autosave {
   #opsTimer: ReturnType<typeof setTimeout> | undefined;
   #previewTimer: ReturnType<typeof setTimeout> | undefined;
   #opsDirty = false;
+  /** The op-log writes, one after the other: flush() waits for the one in flight. */
+  #opsWrite: Promise<void> = Promise.resolve();
 
   constructor(options: {
     pageId: string;
@@ -72,7 +74,16 @@ export class Autosave {
     clearTimeout(this.#previewTimer);
   }
 
-  async #saveOps(): Promise<void> {
+  /**
+   * Queue an op-log write behind the one in flight. A write that failed marks
+   * the log dirty again, so the next queued one (a flush, say) retries it.
+   */
+  #saveOps(): Promise<void> {
+    this.#opsWrite = this.#opsWrite.then(() => this.#writeOps());
+    return this.#opsWrite;
+  }
+
+  async #writeOps(): Promise<void> {
     if (!this.#opsDirty) return;
     this.#opsDirty = false;
     const ok = await saveOps({
@@ -82,7 +93,6 @@ export class Autosave {
       ...(this.#base ? { base: this.#base } : {}),
       updatedAt: Date.now(),
     });
-    // Try again with the next change or flush, unless a newer write is due anyway.
     if (!ok) this.#opsDirty = true;
   }
 
@@ -102,7 +112,14 @@ export class Autosave {
     try {
       const [png, thumb] = await Promise.all([pngPromise, thumbPromise]);
       const ok = await savePreview(
-        { id: this.#pageId, png: await png.arrayBuffer(), opCount, digest, updatedAt: Date.now() },
+        {
+          id: this.#pageId,
+          labelsKey: this.#labelsKey,
+          png: await png.arrayBuffer(),
+          opCount,
+          digest,
+          updatedAt: Date.now(),
+        },
         await thumb.arrayBuffer(),
       );
       if (ok) this.#previewDigest = digest;

@@ -33,7 +33,7 @@ Eltern nur für „Bild speichern".
 | Größen | 8 / 16 / 30 / 52 px (Dokument-Koordinaten), je nach Altersgruppe (§3.1); Radierer ×1.4 |
 | Farben | 16 Kleckse inkl. zwei Hauttöne, Weiß und Schwarz; je nach Altersgruppe (§3.1) |
 | Rückgängig | Unbegrenzt innerhalb der Seite, über Operation-Log (§5.4) |
-| Alles löschen | Eine Operation im Log → rückgängig machbar, stellt exakt wieder her. Nur durch **Gedrückthalten** (0,7 s, ein sonnengelber Ring füllt sich), mit Abstand zu Rückgängig: ein Fehltipp löscht nichts. Tastatur/Screenreader lösen sofort aus |
+| Alles löschen | Eine Operation im Log → rückgängig machbar, stellt exakt wieder her. Nur durch **Gedrückthalten** (0,7 s, ein sonnengelber Ring füllt sich), dann Loslassen — erst das Loslassen löst aus (bei Touch ist es die Nutzergeste, die das Teilen-Menü braucht); mit Abstand zu Rückgängig: ein Fehltipp löscht nichts. Tastatur/Screenreader lösen sofort aus |
 | Autosave | Pro Seite in IndexedDB: Op-Log nach jeder Operation, Vorschau nach Pause/Wechsel (§5.5) |
 | Bild speichern | Gemaltes Bild + Linien als PNG (1200 × 1500); Web Share API, Fallback Download. Ebenfalls Gedrückthalten — das Teilen-Menü ist Sache der Eltern |
 | Neue Version | Nur wenn eine wartet: Icon „Neu laden" oben (kein Text-Toast) |
@@ -176,7 +176,7 @@ IndexedDB `malbuch` (`src/lib/db/db.ts`), Bilder als PNG-`ArrayBuffer`:
 | Store | Inhalt | geschrieben |
 |---|---|---|
 | `ops` | `{ id, labelsKey, ops, base? }` | 400 ms nach jeder Op |
-| `previews` | `{ id, png, opCount, digest }`: Malschicht in voller Größe | nach 3 s Pause, bei Seitenwechsel, Bilderbuch und `visibilitychange: hidden`; beim Öffnen ohne passende Vorschau nach 3 s |
+| `previews` | `{ id, labelsKey, png, opCount, digest }`: Malschicht in voller Größe; als Snapshot nur gültig für dieselben Labels | nach 3 s Pause, bei Seitenwechsel, Bilderbuch und `visibilitychange: hidden`; beim Öffnen ohne passende Vorschau nach 3 s |
 | `thumbs` | `{ id, thumb, digest }`: Thumbnail fürs Bilderbuch (seit DB v2; das Bilderbuch lädt keine Vollbilder) | mit der Vorschau, in einer Transaktion |
 | `labels` | Labels RLE-kodiert + Boxen, Schlüssel `<seite>:<svg-hash>:v<schema>:s<scale>` | einmal pro Zeichnung |
 | `settings` | Werkzeug, Farbe, Größe, letzte Seite | 300 ms nach Änderung |

@@ -21,6 +21,11 @@ export type OpsRecord = {
 /** A page's rendering (spec key `page:<id>:preview`): the fast start. */
 export type PreviewRecord = {
   id: string;
+  /**
+   * The labels (and so the start image) the ops were painted on: after an art
+   * change a new log can repeat an old one's ops, but not its picture.
+   */
+  labelsKey: string;
   /** Full-resolution paint layer after the first `opCount` ops. */
   png: ArrayBuffer;
   opCount: number;
