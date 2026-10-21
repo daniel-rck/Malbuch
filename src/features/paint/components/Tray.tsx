@@ -17,6 +17,13 @@ const BLOBS = [
   "rounded-[42%_58%_60%_40%/52%_48%_52%_48%]",
 ];
 
+/** On phones the colours scroll in one row: the chosen one is kept in view. */
+function keepInView(el: HTMLButtonElement | null): void {
+  if (el && typeof el.scrollIntoView === "function") {
+    el.scrollIntoView({ block: "nearest", inline: "nearest" });
+  }
+}
+
 /**
  * The tray: tools, pen sizes, colours. What it offers follows the age group
  * of the open page (docs/specs/malbuch.md §3): the youngest get ten colours
@@ -32,10 +39,14 @@ export function Tray() {
   return (
     <section
       aria-label="Ablage"
-      className="@container grid gap-3.5 rounded-t-[28px] bg-tray px-3.5 pt-3.5 pb-4 text-on-tray wide:col-start-2 wide:row-span-2 wide:row-start-1 wide:m-4 wide:self-center wide:rounded-[28px]"
+      className="@container grid gap-3.5 rounded-t-[28px] bg-tray px-3.5 pt-3.5 pb-4 text-on-tray compact:gap-2.5 compact:rounded-t-[22px] compact:px-3 compact:pt-2.5 compact:pb-3 wide:col-start-2 wide:row-span-2 wide:row-start-1 wide:m-4 wide:self-center wide:rounded-[28px] wide:compact:row-span-1 wide:compact:row-start-2 wide:compact:mx-2 wide:compact:mt-1 wide:compact:mb-2 wide:compact:rounded-[22px]"
     >
-      <div className="flex flex-wrap items-center justify-between gap-2.5 wide:flex-col wide:items-stretch">
-        <div role="group" aria-label="Werkzeug" className="flex gap-2 wide:justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-2.5 compact:gap-2 wide:flex-col wide:items-stretch">
+        <div
+          role="group"
+          aria-label="Werkzeug"
+          className="flex gap-2 compact:gap-1 wide:justify-between"
+        >
           {TOOLS.map(({ tool, label, icon }) => (
             <button
               key={tool}
@@ -43,13 +54,17 @@ export function Tray() {
               aria-label={label}
               aria-pressed={state.tool === tool}
               onClick={() => dispatch({ type: "tool", tool })}
-              className="grid size-[52px] cursor-pointer place-items-center rounded-2xl bg-tray-2 text-on-tray aria-pressed:bg-sun aria-pressed:text-tray"
+              className="grid size-[52px] cursor-pointer place-items-center rounded-2xl bg-tray-2 text-on-tray compact:size-12 aria-pressed:bg-sun aria-pressed:text-tray"
             >
               {icon}
             </button>
           ))}
         </div>
-        <div role="group" aria-label="Stiftgröße" className="flex gap-2 wide:justify-between">
+        <div
+          role="group"
+          aria-label="Stiftgröße"
+          className="flex gap-2 compact:gap-1 wide:justify-between"
+        >
           {sizes.map(({ size, dot, label }) => (
             <button
               key={size}
@@ -65,7 +80,10 @@ export function Tray() {
                   width: dot,
                   height: dot,
                   background: eraser ? "#fff" : state.color,
-                  boxShadow: eraser ? "inset 0 0 0 2px #9aa3c7" : "inset 0 0 0 2px rgba(0,0,0,.18)",
+                  // The light ring keeps dark colours visible on the indigo tray.
+                  boxShadow: eraser
+                    ? "inset 0 0 0 2px #9aa3c7"
+                    : "inset 0 0 0 2px rgba(0,0,0,.18), 0 0 0 2px rgba(255,255,255,.55)",
                 }}
               />
             </button>
@@ -75,24 +93,29 @@ export function Tray() {
       <div
         role="group"
         aria-label="Farbe"
-        className={
+        className={`${
           // 48 px at least (touch target), 72/64 px at most so the paper keeps its room.
           colors.length <= 10
-            ? "grid grid-cols-[repeat(5,minmax(48px,72px))] justify-center gap-2.5"
+            ? "grid grid-cols-[repeat(5,minmax(48px,72px))] justify-center gap-2.5 wide:gap-[5px]"
             : "grid grid-cols-[repeat(4,minmax(48px,64px))] justify-center gap-2.5 @[22rem]:grid-cols-[repeat(6,minmax(48px,64px))] @[30rem]:grid-cols-[repeat(8,minmax(48px,64px))] wide:gap-3.5"
-        }
+        } ${
+          // Phones: one row that scrolls sideways, so the paper gets the height. The
+          // padding leaves room for the chosen blob's outline, the fade hints at more.
+          "compact:-mx-3 compact:flex compact:touch-pan-x compact:snap-x compact:justify-start compact:gap-2 compact:scroll-px-4 compact:overflow-x-auto compact:px-4 compact:py-2.5 compact:[mask-image:linear-gradient(90deg,transparent,#000_6px,#000_calc(100%-6px),transparent)] compact:[scrollbar-width:none] compact:wide:gap-2 compact:[&::-webkit-scrollbar]:hidden"
+        }`}
       >
         {colors.map(({ color, label }, i) => {
           const selected = !eraser && state.color === color;
           return (
             <button
               key={color}
+              ref={selected ? keepInView : undefined}
               type="button"
               aria-label={label}
               aria-pressed={selected}
               onClick={() => dispatch({ type: "color", color })}
               style={{ background: color }}
-              className={`aspect-square min-h-12 min-w-12 cursor-pointer border-none p-0 shadow-[inset_-4px_-5px_0_rgba(0,0,0,.2),inset_3px_3px_0_rgba(255,255,255,.35)] transition-transform ${BLOBS[i % 3]} ${selected ? "scale-110 -rotate-8 outline-4 outline-offset-2 outline-sun" : ""}`}
+              className={`aspect-square min-h-12 min-w-12 cursor-pointer border-none p-0 shadow-[inset_-4px_-5px_0_rgba(0,0,0,.2),inset_3px_3px_0_rgba(255,255,255,.35),0_0_0_2px_rgba(255,255,255,.3)] transition-transform compact:size-[52px] compact:shrink-0 compact:snap-start ${BLOBS[i % 3]} ${selected ? "scale-110 -rotate-8 outline-4 outline-offset-2 outline-sun" : ""}`}
             />
           );
         })}

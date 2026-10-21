@@ -26,16 +26,16 @@ Eltern nur für „Bild speichern".
 
 | Feature | Verhalten |
 |---|---|
-| Bilderbuch | Knopf oben links (aktuelles Bild); öffnet Vollbild-Übersicht mit 3 Alters-Reitern und großen Vorschaubildern inkl. Gemaltem; Wechsel speichert die aktuelle Seite |
+| Bilderbuch | Knopf oben links (aktuelles Bild); öffnet Vollbild-Übersicht mit 3 Alters-Reitern und großen Vorschaubildern inkl. Gemaltem; Wechsel speichert die aktuelle Seite; die Zurück-Taste (Android) schließt es |
 | Stift | Freihand, geclippt auf die Startfläche (siehe §5.2) |
 | Farbeimer | Tippen füllt die getroffene Fläche komplett (auf einer Linie: die nächste Fläche) |
 | Radierer | Freihand, **nicht** geclippt, entfernt nur Farbe (nie Linien) |
 | Größen | 8 / 16 / 30 / 52 px (Dokument-Koordinaten), je nach Altersgruppe (§3.1); Radierer ×1.4 |
 | Farben | 16 Kleckse inkl. zwei Hauttöne, Weiß und Schwarz; je nach Altersgruppe (§3.1) |
 | Rückgängig | Unbegrenzt innerhalb der Seite, über Operation-Log (§5.4) |
-| Alles löschen | Eine Operation im Log → rückgängig machbar, stellt exakt wieder her |
+| Alles löschen | Eine Operation im Log → rückgängig machbar, stellt exakt wieder her. Nur durch **Gedrückthalten** (0,7 s, ein sonnengelber Ring füllt sich), mit Abstand zu Rückgängig: ein Fehltipp löscht nichts. Tastatur/Screenreader lösen sofort aus |
 | Autosave | Pro Seite in IndexedDB: Op-Log nach jeder Operation, Vorschau nach Pause/Wechsel (§5.5) |
-| Bild speichern | Gemaltes Bild + Linien als PNG (1200 × 1500); Web Share API, Fallback Download |
+| Bild speichern | Gemaltes Bild + Linien als PNG (1200 × 1500); Web Share API, Fallback Download. Ebenfalls Gedrückthalten — das Teilen-Menü ist Sache der Eltern |
 | Neue Version | Nur wenn eine wartet: Icon „Neu laden" oben (kein Text-Toast) |
 | PWA | Installierbar, vollständig offline, Fullscreen, kein Pinch-Zoom/Scroll-Bounce |
 
@@ -248,7 +248,14 @@ Die Palette sind App-Tokens im web-base-Seam `src/lib/ui/theme.css` (`--color-sk
 `-tray`, `-tray-2`, `-sun`, `-paper`, `-shade`, `-on-tray`, `-line`); Light/Dark folgt dem
 System über denselben Mechanismus wie die web-base-Tokens. Akzentfarbe der Flotte: 355 Himbeere
 (`theme_color` `#a71f65`), sichtbar nur auf den web-base-Fehlerseiten.
-Ab 760 px Breite im Querformat wandert die Ablage nach rechts (`wide:`-Variante).
+Im Querformat ab 760 px Breite und auf jedem Handy im Querformat wandert die Ablage nach rechts
+(`wide:`-Variante). Auf Handys (`compact:`, schmaler oder niedriger als 560 px) bekommt das Papier
+den Platz: Knöpfe 48 px, engere Abstände, die Farben in **einer** Reihe, die seitlich scrollt
+(die gewählte bleibt im Blick, ein weicher Rand zeigt „da ist noch mehr"); im Querformat sitzt die
+Kopfleiste über der Ablage und das Papier nimmt die volle Höhe. Tablets bleiben unverändert.
+Kopfleiste: Bilderbuch links, rechts Rückgängig und Speichern, mit Abstand der Papierkorb.
+Kein Pinch-Zoom: `touch-action: none` auf `body` (iOS ignoriert `user-scalable=no`), nur
+Scrollflächen erlauben `pan-x`/`pan-y`.
 Farbkleckse 48–72 px, alle Bedienelemente ≥ 48 px. `prefers-reduced-motion` (Reset in
 `tokens.css`) und Safe-Area-Insets beachten. App-Icon: `assets/icon.svg` → `public/icon-*.png`.
 
@@ -306,6 +313,10 @@ Mit ✓ markiert: automatisiert in Chromium geprüft (Playwright, 2026-10-20).
 - _2026-10-21_ — Splitter-Regel bleibt, aber gezeichnete Formen brauchen ≥ 150 Dok-px² (§6):
   9 Bilder hatten Sterne, Wangen, Blüten, Schnäbel … darunter — ein Tipp malte die Nachbarfläche.
   `/dev/seiten` zeigt verworfene Flächen jetzt orange; die Bilder sind angepasst.
+- _2026-10-21_ — Handy-Layout (`compact:`): Farben in einer scrollenden Reihe statt Raster; das
+  Papier wächst auf dem iPhone von ≈ 321 × 401 auf 370 × 463 px, auf 360er-Android von 150 × 188
+  auf 340 × 425 px. Handys im Querformat bekommen die Seitenablage mit Kopfleiste.
+- _2026-10-21_ — „Alles löschen" und „Bild speichern" per Gedrückthalten statt Tippen.
 - _2026-10-21_ — Thumbnails in eigenem Store (DB v2); Op-Log-Lesefehler öffnen die Seite nicht
   statt leer; die Vorschau wird vor dem Warten aufs Op-Log gelesen.
 - _2026-10-20_ — Spec bleibt Deutsch (web-base empfiehlt Englisch für `docs/specs/`; in

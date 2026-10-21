@@ -135,7 +135,6 @@ export function Paper({ onSession }: { onSession: (session: Session | null) => v
     const paint = paintRef.current;
     if (!el || !paint) return;
     let active: ActivePointer | null = null;
-    let rect: DOMRect | null = null;
     const toDoc = (e: { clientX: number; clientY: number }, r: DOMRect): [number, number] => [
       ((e.clientX - r.left) * DOC_W) / r.width,
       ((e.clientY - r.top) * DOC_H) / r.height,
@@ -150,8 +149,7 @@ export function Paper({ onSession }: { onSession: (session: Session | null) => v
       if (decision === "replace") canvas.abort();
       active = null;
       // The canvases' own box: inside the paper's border, exactly 4:5.
-      rect = paint.getBoundingClientRect();
-      const [x, y] = toDoc(e, rect);
+      const [x, y] = toDoc(e, paint.getBoundingClientRect());
       if (!begin(canvas, x, y)) return;
       active = { id: e.pointerId, kind: e.pointerType };
       try {
@@ -162,11 +160,13 @@ export function Paper({ onSession }: { onSession: (session: Session | null) => v
     };
     const move = (e: PointerEvent) => {
       const canvas = sessionRef.current?.canvas;
-      if (!canvas || !rect || !isActivePointer(active, e.pointerId)) return;
+      if (!canvas || !isActivePointer(active, e.pointerId)) return;
+      // Measured per event: a rotation or split-screen resize mid-stroke moves the paper.
+      const r = paint.getBoundingClientRect();
       // iOS 18.2+ has coalesced events, without pointerId: read positions only.
       const list = typeof e.getCoalescedEvents === "function" ? e.getCoalescedEvents() : [];
       const points: number[] = [];
-      for (const ev of list.length > 0 ? list : [e]) points.push(...toDoc(ev, rect));
+      for (const ev of list.length > 0 ? list : [e]) points.push(...toDoc(ev, r));
       canvas.extend(points);
     };
     const up = (e: PointerEvent) => {
@@ -195,7 +195,7 @@ export function Paper({ onSession }: { onSession: (session: Session | null) => v
   return (
     <div
       ref={stageRef}
-      className="grid min-h-0 place-items-center px-3 pt-2 pb-3.5 wide:col-start-1 wide:row-start-2"
+      className="grid min-h-0 place-items-center px-3 pt-2 pb-3.5 compact:px-1.5 compact:pt-1 compact:pb-2.5 wide:col-start-1 wide:row-start-2 wide:compact:row-span-2 wide:compact:row-start-1 wide:compact:py-2"
     >
       <div
         ref={paperRef}
