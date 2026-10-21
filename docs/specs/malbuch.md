@@ -122,7 +122,7 @@ Algorithmus aus dem Prototyp (`docs/reference/prototype.html`), mit diesen Ände
    per 4er-Nachbarschaft-Floodfill in Regionen (1…n) mit Bounding-Box und Fläche.
    Iterativ mit eigenem Stack (`Int32Array`). **Splitter** unter 150 Dok-px² (Augenlichter,
    Buchstaben-Innenräume, Antialiasing-Löcher) werden Linie — sonst landet ein Strich darin und
-   malt unsichtbar.
+   malt unsichtbar. Gezeichnete Formen müssen deshalb größer sein (§6).
 4. `regionAt(x, y)`: Startpunkt auf einer Linie → in quadratischen Ringen im Radius ≤ 27 Raster-px
    (18 @ Scale 1) die nächste Region suchen. Keine gefunden → Strich ungeclippt.
 5. `buildMask(regionId)`: Region + Linienpixel, die in ≤ `DILATE` Schritten (9 @ Scale 1 → 14)
@@ -209,11 +209,19 @@ Je Altersgruppe:
 | `mittel` | 7–8 | ca. 15–40, kleine Szene | ≥ 14 Dok-px |
 | `gross` | 6–8 | ca. 30–90, Szenen, Comics, Mandala | ≥ 9 Dok-px (Buchstaben-Innenräume ausgenommen) |
 
+Dazu hat jede gezeichnete Fläche (Stern, Wange, Blüte, Schnabel …) mindestens **150 Dok-px²**
+Innenfläche: kleinere macht die Splitter-Regel (§5.2 Schritt 3) zu Linie — die Form lässt sich
+dann nicht anmalen, ein Tipp darauf malt die Nachbarfläche. Winzige Deko lieber massiv
+(`fill="#1E2238"`), Lücken zwischen Formen schließen.
+
 `bun run check:pages` (auch als Test in CI) prüft viewBox, Größe, Strichstärke je Gruppe, Farben,
 erlaubte Elemente (kein `<image>`, `<script>`, `<style>`, `<use>`, `href`, `url()`) und
 `meta.ts` ↔ Dateien. Die Flächen prüft `/dev/seiten` (nur `bun run dev`): jede Seite durch die
-echte Pipeline, Flächen eingefärbt, zu kleine rot, ein JSON-Bericht für Skripte. Eine
-ausgelaufene Fläche zeigt sich als ein Farbton, der sich über mehrere Flächen zieht.
+echte Pipeline, Flächen eingefärbt, zu kleine rot, als Splitter verworfene orange, ein
+JSON-Bericht für Skripte (`tooSmall`, `specks`). Orange dürfen nur Glanzlichter,
+Buchstaben-Innenräume und dünne Splitter (< 30 Dok-px², höchstens ~5 px breit — die Masken der
+Nachbarn decken sie) sein. Eine ausgelaufene Fläche zeigt sich als ein Farbton, der sich über
+mehrere Flächen zieht.
 
 **Bestand (21 Seiten):**
 
@@ -286,5 +294,8 @@ Mit ✓ markiert: automatisiert in Chromium geprüft (Playwright, 2026-10-20).
 - _2026-10-20_ — Vorschau = Malschicht in voller Größe mit Op-Digest (Schnellstart) + Thumbnail;
   Labels nach SVG-Hash geschlüsselt, Ops auf geänderter Zeichnung werden zum Basisbild.
 - _2026-10-20_ — Splitter-Flächen < 150 Dok-px² zählen als Linie.
+- _2026-10-21_ — Splitter-Regel bleibt, aber gezeichnete Formen brauchen ≥ 150 Dok-px² (§6):
+  9 Bilder hatten Sterne, Wangen, Blüten, Schnäbel … darunter — ein Tipp malte die Nachbarfläche.
+  `/dev/seiten` zeigt verworfene Flächen jetzt orange; die Bilder sind angepasst.
 - _2026-10-20_ — Spec bleibt Deutsch (web-base empfiehlt Englisch für `docs/specs/`; in
   web-base 08 als Abweichung vermerkt).

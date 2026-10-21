@@ -16,6 +16,9 @@ import { regionStats } from "../paint/engine/stats.ts";
 import { context2d } from "../paint/render/canvas.ts";
 import { rasterizeDarkness } from "../paint/render/rasterize.ts";
 
+/** Dropped areas under this many doc px² are junction holes, not worth listing. */
+const MIN_SPECK_REPORT = 10;
+
 type PageReport = {
   id: string;
   group: string;
@@ -24,6 +27,12 @@ type PageReport = {
   smallest: number;
   /** Regions under the group's minimum, with their inscribed size in doc px. */
   tooSmall: { id: number; inscribed: number; x: number; y: number }[];
+  /**
+   * White areas the speck rule turned into line (area in doc px², box in doc
+   * px): fine for highlights, letter counters and junction holes — a drawn
+   * shape here can't be coloured.
+   */
+  specks: { area: number; x: number; y: number; w: number; h: number }[];
   labelMs: number;
   /** Mask build of the largest region, the worst case. */
   maskMs: number;
@@ -32,9 +41,9 @@ type PageReport = {
 /**
  * Dev builds only (`/dev/seiten`, `?seite=<id>` for one page): every page
  * through the real rasterise → label pipeline. Regions are tinted, regions
- * under the age group's minimum are red, and a JSON report sits at the end
- * for scripts. A leak in the art shows as one tint spreading where it should
- * not.
+ * under the age group's minimum are red, areas dropped as specks orange, and a
+ * JSON report sits at the end for scripts. A leak in the art shows as one tint
+ * spreading where it should not.
  */
 export function DevPagesPage() {
   const [params] = useSearchParams();
@@ -70,6 +79,22 @@ function PageCard({ page, onReport }: { page: Page; onReport: (r: PageReport) =>
       const t0 = performance.now();
       const regions = labelRegions(darkness, RASTER_W, RASTER_H, LINE_THRESHOLD, SPECK_AREA);
       const labelMs = performance.now() - t0;
+      // The same labelling without the speck rule: what it dropped.
+      const all = labelRegions(darkness, RASTER_W, RASTER_H, LINE_THRESHOLD);
+      const specks: PageReport["specks"] = [];
+      for (let id = 1; id <= all.count; id++) {
+        const raster = all.areas[id] ?? 0;
+        const area = raster / RASTER_SCALE ** 2;
+        if (raster >= SPECK_AREA || area < MIN_SPECK_REPORT) continue;
+        const [x0 = 0, y0 = 0, x1 = 0, y1 = 0] = all.boxes.subarray(id * 4, id * 4 + 4);
+        specks.push({
+          area: Math.round(area),
+          x: Math.round(x0 / RASTER_SCALE),
+          y: Math.round(y0 / RASTER_SCALE),
+          w: Math.round((x1 - x0 + 1) / RASTER_SCALE),
+          h: Math.round((y1 - y0 + 1) / RASTER_SCALE),
+        });
+      }
       let largest = 1;
       for (let id = 1; id <= regions.count; id++) {
         if ((regions.areas[id] ?? 0) > (regions.areas[largest] ?? 0)) largest = id;
@@ -97,7 +122,8 @@ function PageCard({ page, onReport }: { page: Page; onReport: (r: PageReport) =>
         const px = new Uint32Array(img.data.buffer);
         for (let i = 0; i < regions.labels.length; i++) {
           const l = regions.labels[i] ?? LINE;
-          px[i] = l === LINE ? 0xff38221e : small.has(l) ? 0xff0000ff : tint(l);
+          if (l === LINE) px[i] = (all.labels[i] ?? LINE) > 0 ? 0xff00a0ff : 0xff38221e;
+          else px[i] = small.has(l) ? 0xff0000ff : tint(l);
         }
         ctx.putImageData(img, 0, 0);
       }
@@ -107,6 +133,7 @@ function PageCard({ page, onReport }: { page: Page; onReport: (r: PageReport) =>
         regions: regions.count,
         smallest: Math.round(Math.min(...stats.map((s) => s.inscribed)) / RASTER_SCALE),
         tooSmall,
+        specks,
         labelMs: Math.round(labelMs),
         maskMs: Math.round(maskMs * 10) / 10,
       };
@@ -132,7 +159,8 @@ function PageCard({ page, onReport }: { page: Page; onReport: (r: PageReport) =>
           <>
             {" "}
             · {report.regions} Flächen · kleinste {report.smallest} px · zu klein:{" "}
-            {report.tooSmall.length} · Labels {report.labelMs} ms · Maske {report.maskMs} ms
+            {report.tooSmall.length} · verworfen: {report.specks.length} · Labels {report.labelMs}{" "}
+            ms · Maske {report.maskMs} ms
           </>
         )}
       </figcaption>

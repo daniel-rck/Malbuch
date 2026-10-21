@@ -19,6 +19,7 @@ export type AgeGroup = {
   /**
    * Smallest region: side of the largest square that fits inside, in doc px
    * (checked on /dev/seiten). Letter counters in speech bubbles are exempt.
+   * Every region also needs SPECK_AREA (150 doc px²), or it becomes line.
    */
   minRegion: number;
 };
