@@ -40,8 +40,9 @@ export function PaintPage() {
     return () => clearTimeout(timer);
   }, [restored, state.tool, state.color, state.size, state.pageId]);
 
-  // Ctrl/Cmd+Z for the grown-ups with a keyboard.
+  // Ctrl/Cmd+Z for the grown-ups with a keyboard — not behind the picture book.
   useEffect(() => {
+    if (state.pickerOpen) return;
     const onKey = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "z") {
         e.preventDefault();
@@ -50,7 +51,21 @@ export function PaintPage() {
     };
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
-  }, [session]);
+  }, [session, state.pickerOpen]);
+
+  // Android Back (and its edge swipe) closes the picture book instead of
+  // leaving the app: the open book is a history entry of its own.
+  useEffect(() => {
+    if (!state.pickerOpen) return;
+    history.pushState({ ...(history.state as object | null), malbuchBook: true }, "");
+    const onPop = () => dispatch({ type: "picker", open: false });
+    window.addEventListener("popstate", onPop);
+    return () => {
+      window.removeEventListener("popstate", onPop);
+      // Closed some other way (X, Escape, a pick): take the entry off again.
+      if ((history.state as { malbuchBook?: boolean } | null)?.malbuchBook) history.back();
+    };
+  }, [state.pickerOpen]);
 
   const pickPage = (pageId: string) => {
     if (session?.canvas.isDrawing) return;
@@ -59,12 +74,15 @@ export function PaintPage() {
 
   return (
     <PaintContext value={{ state, dispatch }}>
-      <div className="grid h-full grid-rows-[auto_minmax(0,1fr)_auto] wide:grid-cols-[minmax(0,1fr)_320px] wide:grid-rows-[auto_minmax(0,1fr)]">
+      <div
+        inert={state.pickerOpen}
+        className="grid h-full grid-rows-[auto_minmax(0,1fr)_auto] wide:grid-cols-[minmax(0,1fr)_320px] wide:grid-rows-[auto_minmax(0,1fr)] wide:compact:grid-cols-[minmax(0,1fr)_296px]"
+      >
         <TopBar session={session} thumbs={thumbs} />
         {restored ? (
           <Paper onSession={setSession} />
         ) : (
-          <div className="min-h-0 wide:col-start-1 wide:row-start-2" />
+          <div className="min-h-0 wide:col-start-1 wide:row-start-2 wide:compact:row-span-2 wide:compact:row-start-1" />
         )}
         <Tray />
       </div>

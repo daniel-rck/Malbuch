@@ -26,16 +26,16 @@ Eltern nur für „Bild speichern".
 
 | Feature | Verhalten |
 |---|---|
-| Bilderbuch | Knopf oben links (aktuelles Bild); öffnet Vollbild-Übersicht mit 3 Alters-Reitern und großen Vorschaubildern inkl. Gemaltem; Wechsel speichert die aktuelle Seite |
+| Bilderbuch | Knopf oben links (aktuelles Bild); öffnet Vollbild-Übersicht mit 3 Alters-Reitern und großen Vorschaubildern inkl. Gemaltem; Wechsel speichert die aktuelle Seite; die Zurück-Taste (Android) schließt es |
 | Stift | Freihand, geclippt auf die Startfläche (siehe §5.2) |
 | Farbeimer | Tippen füllt die getroffene Fläche komplett (auf einer Linie: die nächste Fläche) |
 | Radierer | Freihand, **nicht** geclippt, entfernt nur Farbe (nie Linien) |
 | Größen | 8 / 16 / 30 / 52 px (Dokument-Koordinaten), je nach Altersgruppe (§3.1); Radierer ×1.4 |
 | Farben | 16 Kleckse inkl. zwei Hauttöne, Weiß und Schwarz; je nach Altersgruppe (§3.1) |
 | Rückgängig | Unbegrenzt innerhalb der Seite, über Operation-Log (§5.4) |
-| Alles löschen | Eine Operation im Log → rückgängig machbar, stellt exakt wieder her |
+| Alles löschen | Eine Operation im Log → rückgängig machbar, stellt exakt wieder her. Nur durch **Gedrückthalten** (0,7 s, ein sonnengelber Ring füllt sich), dann Loslassen — erst das Loslassen löst aus (bei Touch ist es die Nutzergeste, die das Teilen-Menü braucht); mit Abstand zu Rückgängig: ein Fehltipp löscht nichts. Tastatur/Screenreader lösen sofort aus |
 | Autosave | Pro Seite in IndexedDB: Op-Log nach jeder Operation, Vorschau nach Pause/Wechsel (§5.5) |
-| Bild speichern | Gemaltes Bild + Linien als PNG (1200 × 1500); Web Share API, Fallback Download |
+| Bild speichern | Gemaltes Bild + Linien als PNG (1200 × 1500); Web Share API, Fallback Download. Ebenfalls Gedrückthalten — das Teilen-Menü ist Sache der Eltern |
 | Neue Version | Nur wenn eine wartet: Icon „Neu laden" oben (kein Text-Toast) |
 | PWA | Installierbar, vollständig offline, Fullscreen, kein Pinch-Zoom/Scroll-Bounce |
 
@@ -122,7 +122,7 @@ Algorithmus aus dem Prototyp (`docs/reference/prototype.html`), mit diesen Ände
    per 4er-Nachbarschaft-Floodfill in Regionen (1…n) mit Bounding-Box und Fläche.
    Iterativ mit eigenem Stack (`Int32Array`). **Splitter** unter 150 Dok-px² (Augenlichter,
    Buchstaben-Innenräume, Antialiasing-Löcher) werden Linie — sonst landet ein Strich darin und
-   malt unsichtbar.
+   malt unsichtbar. Gezeichnete Formen müssen deshalb größer sein (§6).
 4. `regionAt(x, y)`: Startpunkt auf einer Linie → in quadratischen Ringen im Radius ≤ 27 Raster-px
    (18 @ Scale 1) die nächste Region suchen. Keine gefunden → Strich ungeclippt.
 5. `buildMask(regionId)`: Region + Linienpixel, die in ≤ `DILATE` Schritten (9 @ Scale 1 → 14)
@@ -176,7 +176,8 @@ IndexedDB `malbuch` (`src/lib/db/db.ts`), Bilder als PNG-`ArrayBuffer`:
 | Store | Inhalt | geschrieben |
 |---|---|---|
 | `ops` | `{ id, labelsKey, ops, base? }` | 400 ms nach jeder Op |
-| `previews` | `{ id, png, opCount, digest, thumb }`: Malschicht in voller Größe + Thumbnail | nach 3 s Pause, bei Seitenwechsel, Bilderbuch und `visibilitychange: hidden` |
+| `previews` | `{ id, labelsKey, png, opCount, digest }`: Malschicht in voller Größe; als Snapshot nur gültig für dieselben Labels | nach 3 s Pause, bei Seitenwechsel, Bilderbuch und `visibilitychange: hidden`; beim Öffnen ohne passende Vorschau nach 3 s |
+| `thumbs` | `{ id, thumb, digest }`: Thumbnail fürs Bilderbuch (seit DB v2; das Bilderbuch lädt keine Vollbilder) | mit der Vorschau, in einer Transaktion |
 | `labels` | Labels RLE-kodiert + Boxen, Schlüssel `<seite>:<svg-hash>:v<schema>:s<scale>` | einmal pro Zeichnung |
 | `settings` | Werkzeug, Farbe, Größe, letzte Seite | 300 ms nach Änderung |
 
@@ -185,8 +186,16 @@ IndexedDB `malbuch` (`src/lib/db/db.ts`), Bilder als PNG-`ArrayBuffer`:
   danach werden nur die übrigen Ops abgespielt.
 - **Geänderte Zeichnung:** Region-IDs hängen an der Rasterung. Ändert sich der Label-Schlüssel
   einer Seite mit Ops, werden die alten Ops einmal mit den alten Labels gerendert; das Ergebnis
-  wird `base`, das Log beginnt neu, die alten Labels werden gelöscht.
-- Schreibfehler (Quota) werden geschluckt und geloggt, die App läuft weiter.
+  wird `base`, das Log beginnt neu, die alten Labels werden gelöscht — erst wenn das neue Log
+  gespeichert ist; sonst bleibt alles für den nächsten Versuch.
+- Schreibfehler (Quota) werden geschluckt und geloggt, die App läuft weiter; ein fehlgeschlagener
+  Op-Log-Schreibversuch wird beim nächsten Speichern wiederholt.
+- Ein Lesefehler des Op-Logs ist **kein** leeres Log: einmal neu lesen, sonst öffnet die Seite
+  nicht (ein leerer Start würde das gespeicherte Log beim nächsten Strich überschreiben).
+- `flush()` liest die Malschicht, bevor es auf irgendetwas wartet: der Seitenwechsel darf sie
+  gleich danach leeren.
+- Beim Start wird `navigator.storage.persist()` angefragt, damit der Browser die Bilder nicht
+  verdrängt.
 
 ## 6. Ausmalbilder-Konvention
 
@@ -209,11 +218,19 @@ Je Altersgruppe:
 | `mittel` | 7–8 | ca. 15–40, kleine Szene | ≥ 14 Dok-px |
 | `gross` | 6–8 | ca. 30–90, Szenen, Comics, Mandala | ≥ 9 Dok-px (Buchstaben-Innenräume ausgenommen) |
 
+Dazu hat jede gezeichnete Fläche (Stern, Wange, Blüte, Schnabel …) mindestens **150 Dok-px²**
+Innenfläche: kleinere macht die Splitter-Regel (§5.2 Schritt 3) zu Linie — die Form lässt sich
+dann nicht anmalen, ein Tipp darauf malt die Nachbarfläche. Winzige Deko lieber massiv
+(`fill="#1E2238"`), Lücken zwischen Formen schließen.
+
 `bun run check:pages` (auch als Test in CI) prüft viewBox, Größe, Strichstärke je Gruppe, Farben,
 erlaubte Elemente (kein `<image>`, `<script>`, `<style>`, `<use>`, `href`, `url()`) und
 `meta.ts` ↔ Dateien. Die Flächen prüft `/dev/seiten` (nur `bun run dev`): jede Seite durch die
-echte Pipeline, Flächen eingefärbt, zu kleine rot, ein JSON-Bericht für Skripte. Eine
-ausgelaufene Fläche zeigt sich als ein Farbton, der sich über mehrere Flächen zieht.
+echte Pipeline, Flächen eingefärbt, zu kleine rot, als Splitter verworfene orange, ein
+JSON-Bericht für Skripte (`tooSmall`, `specks`). Orange dürfen nur Glanzlichter,
+Buchstaben-Innenräume und dünne Splitter (< 30 Dok-px², höchstens ~5 px breit — die Masken der
+Nachbarn decken sie) sein. Eine ausgelaufene Fläche zeigt sich als ein Farbton, der sich über
+mehrere Flächen zieht.
 
 **Bestand (21 Seiten):**
 
@@ -231,7 +248,14 @@ Die Palette sind App-Tokens im web-base-Seam `src/lib/ui/theme.css` (`--color-sk
 `-tray`, `-tray-2`, `-sun`, `-paper`, `-shade`, `-on-tray`, `-line`); Light/Dark folgt dem
 System über denselben Mechanismus wie die web-base-Tokens. Akzentfarbe der Flotte: 355 Himbeere
 (`theme_color` `#a71f65`), sichtbar nur auf den web-base-Fehlerseiten.
-Ab 760 px Breite im Querformat wandert die Ablage nach rechts (`wide:`-Variante).
+Im Querformat ab 760 px Breite und auf jedem Handy im Querformat wandert die Ablage nach rechts
+(`wide:`-Variante). Auf Handys (`compact:`, schmaler oder niedriger als 560 px) bekommt das Papier
+den Platz: Knöpfe 48 px, engere Abstände, die Farben in **einer** Reihe, die seitlich scrollt
+(die gewählte bleibt im Blick, ein weicher Rand zeigt „da ist noch mehr"); im Querformat sitzt die
+Kopfleiste über der Ablage und das Papier nimmt die volle Höhe. Tablets bleiben unverändert.
+Kopfleiste: Bilderbuch links, rechts Rückgängig und Speichern, mit Abstand der Papierkorb.
+Kein Pinch-Zoom: `touch-action: none` auf `body` (iOS ignoriert `user-scalable=no`), nur
+Scrollflächen erlauben `pan-x`/`pan-y`.
 Farbkleckse 48–72 px, alle Bedienelemente ≥ 48 px. `prefers-reduced-motion` (Reset in
 `tokens.css`) und Safe-Area-Insets beachten. App-Icon: `assets/icon.svg` → `public/icon-*.png`.
 
@@ -286,5 +310,14 @@ Mit ✓ markiert: automatisiert in Chromium geprüft (Playwright, 2026-10-20).
 - _2026-10-20_ — Vorschau = Malschicht in voller Größe mit Op-Digest (Schnellstart) + Thumbnail;
   Labels nach SVG-Hash geschlüsselt, Ops auf geänderter Zeichnung werden zum Basisbild.
 - _2026-10-20_ — Splitter-Flächen < 150 Dok-px² zählen als Linie.
+- _2026-10-21_ — Splitter-Regel bleibt, aber gezeichnete Formen brauchen ≥ 150 Dok-px² (§6):
+  9 Bilder hatten Sterne, Wangen, Blüten, Schnäbel … darunter — ein Tipp malte die Nachbarfläche.
+  `/dev/seiten` zeigt verworfene Flächen jetzt orange; die Bilder sind angepasst.
+- _2026-10-21_ — Handy-Layout (`compact:`): Farben in einer scrollenden Reihe statt Raster; das
+  Papier wächst auf dem iPhone von ≈ 321 × 401 auf 370 × 463 px, auf 360er-Android von 150 × 188
+  auf 340 × 425 px. Handys im Querformat bekommen die Seitenablage mit Kopfleiste.
+- _2026-10-21_ — „Alles löschen" und „Bild speichern" per Gedrückthalten statt Tippen.
+- _2026-10-21_ — Thumbnails in eigenem Store (DB v2); Op-Log-Lesefehler öffnen die Seite nicht
+  statt leer; die Vorschau wird vor dem Warten aufs Op-Log gelesen.
 - _2026-10-20_ — Spec bleibt Deutsch (web-base empfiehlt Englisch für `docs/specs/`; in
   web-base 08 als Abweichung vermerkt).

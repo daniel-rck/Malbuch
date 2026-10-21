@@ -48,37 +48,46 @@ export function TopBar({
   };
 
   return (
-    <header className="flex items-center justify-between gap-3 px-3.5 pt-2.5 pb-1 wide:col-start-1 wide:row-start-1">
+    <header className="flex items-center justify-between gap-3 px-3.5 pt-2.5 pb-1 compact:gap-2 compact:px-2.5 compact:pt-1.5 wide:col-start-1 wide:row-start-1 wide:compact:col-start-2 wide:compact:pt-2">
       <button
         type="button"
         aria-label={page ? `Bild wählen, jetzt: ${page.name}` : "Bild wählen"}
         onClick={openPicker}
-        className="w-[56px] shrink-0 -rotate-3 cursor-pointer overflow-hidden rounded-xl border-[3px] border-sun bg-paper p-0 shadow-[0_4px_0_var(--color-shade)] transition-transform active:translate-y-0.5"
+        className="w-[56px] shrink-0 -rotate-3 compact:w-12 cursor-pointer overflow-hidden rounded-xl border-[3px] border-sun bg-paper p-0 shadow-[0_4px_0_var(--color-shade)] transition-transform active:translate-y-0.5"
       >
         {page && <PageThumb page={page} thumb={thumbs.get(page.id)} />}
       </button>
-      <div className="flex gap-2.5">
-        {update.needRefresh && (
-          <RoundButton label="Neue Version laden" onClick={() => void reload()}>
-            <ReloadIcon />
+      {/* Clearing sits apart from Undo, and it and saving need a held finger (spec §3). */}
+      <div className="flex gap-6 compact:gap-4">
+        <div className="flex gap-2.5 compact:gap-2">
+          {update.needRefresh && (
+            <RoundButton label="Neue Version laden" onClick={() => void reload()}>
+              <ReloadIcon />
+            </RoundButton>
+          )}
+          <RoundButton
+            label="Rückgängig"
+            disabled={!canUndo}
+            onClick={() => session?.canvas.undo()}
+          >
+            <UndoIcon />
           </RoundButton>
-        )}
-        <RoundButton label="Rückgängig" disabled={!canUndo} onClick={() => session?.canvas.undo()}>
-          <UndoIcon />
-        </RoundButton>
+          <RoundButton
+            label="Bild speichern"
+            hold
+            disabled={!session || saving}
+            onClick={() => void save()}
+          >
+            <SaveIcon />
+          </RoundButton>
+        </div>
         <RoundButton
           label="Alles wegmachen"
+          hold
           disabled={!canClear}
           onClick={() => session?.canvas.clear()}
         >
           <TrashIcon />
-        </RoundButton>
-        <RoundButton
-          label="Bild speichern"
-          disabled={!session || saving}
-          onClick={() => void save()}
-        >
-          <SaveIcon />
         </RoundButton>
       </div>
     </header>

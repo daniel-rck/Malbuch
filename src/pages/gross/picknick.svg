@@ -14,8 +14,8 @@
     <path fill="none" d="M740 60 L748.5 51.5"/>
     <path d="M122 86 A12.8 12.8 0 0 1 106.9 100.1 A21.1 21.1 0 0 1 73.1 103.5 A17.9 17.9 0 0 1 46 93.8 A9.7 9.7 0 0 1 46 78.2 A17.9 17.9 0 0 1 73.1 68.5 A21.1 21.1 0 0 1 106.9 71.9 A12.8 12.8 0 0 1 122 86 Z"/>
     <polygon points="228,234 572,234 614,312 186,312"/>
-    <circle cx="244.5" cy="161.5" r="15.8"/>
-    <circle cx="307.5" cy="161.5" r="15.8"/>
+    <circle cx="238.2" cy="157.7" r="18"/>
+    <circle cx="313.8" cy="157.7" r="18"/>
     <ellipse cx="276" cy="249.7" rx="48.3" ry="50.4"/>
     <ellipse cx="234" cy="243.4" rx="12.6" ry="26.3" transform="rotate(22 234 243.4)"/>
     <ellipse cx="318" cy="243.4" rx="12.6" ry="26.3" transform="rotate(-22 318 243.4)"/>
@@ -51,8 +51,8 @@
     <rect x="20" y="346" width="760" height="307" rx="24"/>
     <path fill="none" d="M20 542 L780 542"/>
     <polygon points="228,560 572,560 614,638 186,638"/>
-    <circle cx="244.5" cy="487.5" r="15.8"/>
-    <circle cx="307.5" cy="487.5" r="15.8"/>
+    <circle cx="238.2" cy="483.7" r="18"/>
+    <circle cx="313.8" cy="483.7" r="18"/>
     <ellipse cx="223.5" cy="531.6" rx="12.6" ry="27.3" transform="rotate(-30 223.5 531.6)"/>
     <ellipse cx="328.5" cy="531.6" rx="12.6" ry="27.3" transform="rotate(30 328.5 531.6)"/>
     <ellipse cx="276" cy="575.7" rx="48.3" ry="50.4"/>
@@ -81,18 +81,18 @@
     <circle cx="386" cy="612" r="3" fill="#1E2238"/>
     <circle cx="410" cy="616" r="3" fill="#1E2238"/>
     <circle cx="398" cy="620" r="3" fill="#1E2238"/>
-    <path fill="none" d="M548 386 L594 396 M556 418 L596 418"/>
+    <path fill="none" d="M548 374 L594 384 M556 406 L596 406"/>
     <path d="M626 524 L698 524 L698 502 L626 502 Z"/>
     <path d="M618 505 Q626 494 618 483 L706 483 Q698 494 706 505 Z"/>
     <path d="M626 485 Q626 454 662 454 Q698 454 698 485 Z"/>
-    <path fill="none" d="M650 446 L644 460 M672 446 L678 460"/>
-    <polygon points="637,412.6 601.9,393.7 604.6,431.5"/>
-    <ellipse cx="664" cy="418" rx="36.5" ry="27"/>
-    <path d="M669.4 412.6 Q650.5 372.1 626.2 396.4 Q642.4 418 669.4 412.6 Z"/>
-    <circle cx="696.4" cy="396.4" r="21.6"/>
-    <polygon points="715.3,389.7 736.9,399.1 715.3,407.2"/>
-    <circle cx="700.5" cy="392.4" r="4.7" fill="#1E2238"/>
-    <path d="M125 376 L199 376 A33 33 0 0 1 199 442 L187 442 L240 482 L159 442 L125 442 A33 33 0 0 1 125 376 Z"/>
+    <path fill="none" d="M650 434 L644 460 M672 434 L678 460"/>
+    <polygon points="637,400.6 601.9,381.7 604.6,419.5"/>
+    <ellipse cx="664" cy="406" rx="36.5" ry="27"/>
+    <path d="M669.4 400.6 Q650.5 360.1 626.2 384.4 Q642.4 406 669.4 400.6 Z"/>
+    <circle cx="696.4" cy="384.4" r="21.6"/>
+    <polygon points="714,372 750,386 714,400"/>
+    <circle cx="700.5" cy="380.4" r="4.7" fill="#1E2238"/>
+    <path d="M125 376 L199 376 A33 33 0 0 1 199 442 L187 442 L219 467 L159 442 L125 442 A33 33 0 0 1 125 376 Z"/>
     <text x="162" y="421" text-anchor="middle" font-size="34" font-weight="700" font-family="Arial, Helvetica, sans-serif" fill="#1E2238" stroke="none">He!</text>
     <rect x="20" y="673" width="760" height="307" rx="24"/>
     <path fill="none" d="M20 869 L780 869"/>
@@ -106,8 +106,8 @@
     <path fill="none" d="M716 703 L716 691"/>
     <path fill="none" d="M740 713 L748.5 704.5"/>
     <polygon points="228,887 572,887 614,965 186,965"/>
-    <circle cx="230.5" cy="814.5" r="15.8"/>
-    <circle cx="293.5" cy="814.5" r="15.8"/>
+    <circle cx="224.2" cy="810.7" r="18"/>
+    <circle cx="299.8" cy="810.7" r="18"/>
     <ellipse cx="262" cy="902.7" rx="48.3" ry="50.4"/>
     <ellipse cx="220" cy="896.4" rx="12.6" ry="26.3" transform="rotate(22 220 896.4)"/>
     <ellipse cx="304" cy="896.4" rx="12.6" ry="26.3" transform="rotate(-22 304 896.4)"/>
@@ -134,7 +134,7 @@
     <ellipse cx="404" cy="849" rx="35.1" ry="26"/>
     <path d="M398.8 843.8 Q417 804.8 440.4 828.2 Q424.8 849 398.8 843.8 Z"/>
     <circle cx="372.8" cy="828.2" r="20.8"/>
-    <polygon points="354.6,821.7 333.8,830.8 354.6,838.6"/>
+    <polygon points="355,816 319,830 355,844"/>
     <circle cx="368.9" cy="824.3" r="4.6" fill="#1E2238"/>
     <ellipse cx="400" cy="947" rx="66" ry="15"/>
     <polygon points="350,943 388,943 362,909"/>

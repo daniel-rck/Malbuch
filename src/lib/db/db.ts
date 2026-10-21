@@ -1,4 +1,4 @@
-import type { DBSchema } from "idb";
+import type { DBSchema, OpenDBCallbacks } from "idb";
 import type { Tool } from "../../features/paint/config.ts";
 import type { Op } from "../../features/paint/engine/ops.ts";
 import { clearStores } from "./mutations.ts";
@@ -18,16 +18,31 @@ export type OpsRecord = {
   updatedAt: number;
 };
 
-/** A page's rendering (spec key `page:<id>:preview`): fast start and picture-book thumbnail. */
+/** A page's rendering (spec key `page:<id>:preview`): the fast start. */
 export type PreviewRecord = {
   id: string;
+  /**
+   * The labels (and so the start image) the ops were painted on: after an art
+   * change a new log can repeat an old one's ops, but not its picture.
+   */
+  labelsKey: string;
   /** Full-resolution paint layer after the first `opCount` ops. */
   png: ArrayBuffer;
   opCount: number;
   /** opsDigest of those ops: a snapshot is only used while it matches the log. */
   digest: string;
-  /** Small paint layer for the picture book. */
+  updatedAt: number;
+};
+
+/**
+ * A page's small paint layer for the picture book, written together with its
+ * preview. A store of its own, so the book never loads the full-size PNGs.
+ */
+export type ThumbRecord = {
+  id: string;
   thumb: ArrayBuffer;
+  /** The preview's digest: a thumbnail's image URL is kept while it is unchanged. */
+  digest: string;
   updatedAt: number;
 };
 
@@ -49,25 +64,45 @@ export type Settings = { id: "settings"; tool: Tool; color: string; size: number
 export interface AppSchema extends DBSchema {
   ops: { key: string; value: OpsRecord };
   previews: { key: string; value: PreviewRecord };
+  thumbs: { key: string; value: ThumbRecord };
   labels: { key: string; value: LabelsRecord; indexes: { byPage: string } };
   settings: { key: string; value: Settings };
 }
+
+/** A v1 preview: the thumbnail still inline. */
+type PreviewRecordV1 = PreviewRecord & { thumb?: ArrayBuffer };
+
+/** The migration ladder (exported for its test). */
+export const upgrade: OpenDBCallbacks<AppSchema>["upgrade"] = (db, oldVersion, _new, tx) => {
+  // Never edit a step that has shipped: bump `version` below and add a new
+  // `if (oldVersion < N)` after the last one.
+  if (oldVersion < 1) {
+    db.createObjectStore("ops", { keyPath: "id" });
+    db.createObjectStore("previews", { keyPath: "id" });
+    db.createObjectStore("labels", { keyPath: "key" }).createIndex("byPage", "pageId");
+    db.createObjectStore("settings", { keyPath: "id" });
+  }
+  if (oldVersion < 2) {
+    // Thumbnails get a store of their own; v1 previews carried them inline
+    // (and keep that copy until they are saved again).
+    const thumbs = db.createObjectStore("thumbs", { keyPath: "id" });
+    void tx
+      .objectStore("previews")
+      .getAll()
+      .then(async (previews: PreviewRecordV1[]) => {
+        for (const { id, thumb, digest, updatedAt } of previews) {
+          if (thumb) await thumbs.put({ id, thumb, digest, updatedAt });
+        }
+      });
+  }
+};
 
 export const getDB = createDBOpener<AppSchema>({
   // Unique per app: in local dev every app shares the localhost origin, so two
   // apps with the same name would share (and upgrade) one database.
   name: "malbuch",
-  version: 1,
-  upgrade(db, oldVersion) {
-    // The migration ladder. Never edit a step that has shipped: bump
-    // `version` and add a new `if (oldVersion < N)` below the last one.
-    if (oldVersion < 1) {
-      db.createObjectStore("ops", { keyPath: "id" });
-      db.createObjectStore("previews", { keyPath: "id" });
-      db.createObjectStore("labels", { keyPath: "key" }).createIndex("byPage", "pageId");
-      db.createObjectStore("settings", { keyPath: "id" });
-    }
-  },
+  version: 2,
+  upgrade,
 });
 
 /** Wipe every store (tests' `beforeEach`, a "delete all data" action). */

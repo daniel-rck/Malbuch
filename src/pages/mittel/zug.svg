@@ -2,7 +2,7 @@
   <!-- Zug -->
   <g fill="#fff" stroke="#1E2238" stroke-width="7" stroke-linejoin="round" stroke-linecap="round">
     <rect x="20" y="20" width="760" height="960" rx="28"/>
-    <path fill="none" d="M20 600 Q110 545 200 585 Q290 620 380 575 Q480 525 580 580 Q680 630 780 575"/>
+    <path fill="none" d="M20 600 Q110 545 200 585 Q290 620 380 575 Q480 500 580 580 Q680 630 780 575"/>
     <path fill="none" d="M216 145 L238 145"/>
     <path fill="none" d="M193.7 198.7 L209.3 214.3"/>
     <path fill="none" d="M140 221 L140 243"/>

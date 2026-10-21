@@ -47,8 +47,20 @@
   --color-shade: #060a20;
 }
 
-/* Landscape from 760 px: the tray moves to the right. */
-@custom-variant wide (@media (min-width: 760px) and (min-aspect-ratio: 1/1));
+/* Landscape from 760 px, and every landscape phone: the tray moves to the right. */
+@custom-variant wide {
+  @media (min-aspect-ratio: 1/1) and (min-width: 760px),
+    (min-aspect-ratio: 1/1) and (max-height: 559px) {
+    @slot;
+  }
+}
+
+/* Phones, either way round: everything around the paper gets tighter. */
+@custom-variant compact {
+  @media (max-width: 559px), (max-height: 559px) {
+    @slot;
+  }
+}
 
 html,
 body,
@@ -62,6 +74,9 @@ html {
 
 body {
   overscroll-behavior: none;
+  /* No pinch zoom anywhere: iOS ignores user-scalable=no. Scroll areas opt
+     back in with touch-pan-x/-y; the paper is touch-none anyway. */
+  touch-action: none;
   background-color: var(--color-sky);
   background-image: radial-gradient(var(--color-dots) 2.5px, transparent 3px);
   background-size: 28px 28px;

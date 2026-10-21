@@ -21,7 +21,8 @@ export const SEARCH_RADIUS = Math.round(18 * RASTER_SCALE);
 /**
  * Regions smaller than this many doc px² (eye highlights, letter counters,
  * antialiasing holes in line junctions) count as line: nobody colours them on
- * purpose, and a stroke that started in one would paint nothing visible.
+ * purpose, and a stroke that started in one would paint nothing visible. A
+ * drawn shape must be larger (spec §6), or it can't be coloured at all.
  */
 export const SPECK_AREA = Math.round(150 * RASTER_SCALE * RASTER_SCALE);
 
