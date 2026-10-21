@@ -71,18 +71,22 @@ describe("buildMask", () => {
   });
 
   it("matches the prototype's pass-by-pass dilation bit for bit", () => {
+    // toEqual on typed arrays is slow: compare by hand, report the cases that differ.
+    const differ: string[] = [];
     for (const seed of [1, 2, 3, 4, 5]) {
       const w = 40;
       const h = 30;
       const r = labelRegions(noise(w, h, seed), w, h, 110);
       for (let id = 1; id <= r.count; id++) {
         for (const dilate of [0, 1, 3, 9]) {
-          const ref = prototypeMask(r, id, dilate);
+          const ref = Uint8Array.from(prototypeMask(r, id, dilate), (v) => (v ? 1 : 0));
           const ours = full(r, id, dilate);
-          expect(ours).toEqual(Uint8Array.from(ref, (v) => (v ? 1 : 0)));
+          if (ours.some((v, i) => v !== ref[i]))
+            differ.push(`seed ${seed} region ${id} dilate ${dilate}`);
         }
       }
     }
+    expect(differ).toEqual([]);
   });
 
   it("never wraps across a row edge", () => {
