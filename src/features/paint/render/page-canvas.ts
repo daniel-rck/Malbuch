@@ -68,7 +68,7 @@ export class PageCanvas {
   /** The paint before the last clear, so undoing it is exact by construction. */
   #pinned: Held | null = null;
   #active: Active | null = null;
-  #warm: { canvas: HTMLCanvasElement; handle: number } | null = null;
+  #warm: { canvas: HTMLCanvasElement; cancel: () => void } | null = null;
   #frame = 0;
   #version = 0;
   readonly #listeners = new Set<() => void>();
@@ -420,14 +420,14 @@ export class PageCanvas {
           if (op) this.#apply(op, ctx);
         }
       }
-      if (this.#warm) this.#warm.handle = whenIdle(run);
+      if (this.#warm) this.#warm.cancel = whenIdle(run);
     };
-    this.#warm = { canvas, handle: whenIdle(run) };
+    this.#warm = { canvas, cancel: whenIdle(run) };
   }
 
   #stopWarmUp(): void {
     if (!this.#warm) return;
-    cancelIdle(this.#warm.handle);
+    this.#warm.cancel();
     this.#spare.push(this.#warm.canvas);
     this.#warm = null;
   }
@@ -437,18 +437,19 @@ function nextBoundary(at: number): number {
   return (Math.floor(at / CHECKPOINT_EVERY) + 1) * CHECKPOINT_EVERY;
 }
 
-/** requestIdleCallback where there is one (not in Safari), else a short timeout. */
-function whenIdle(run: (timeLeft: () => number) => void): number {
+/**
+ * requestIdleCallback where there is one (not in Safari), else a short
+ * timeout. Returns how to cancel it: the two kinds of id share no counter, so
+ * clearing one with the other's API could cancel an unrelated timer.
+ */
+function whenIdle(run: (timeLeft: () => number) => void): () => void {
   if (typeof requestIdleCallback === "function") {
-    return requestIdleCallback((d) => run(() => d.timeRemaining()), { timeout: 500 });
+    const id = requestIdleCallback((d) => run(() => d.timeRemaining()), { timeout: 500 });
+    return () => cancelIdleCallback(id);
   }
-  return window.setTimeout(() => {
+  const id = window.setTimeout(() => {
     const end = performance.now() + 8;
     run(() => end - performance.now());
   }, 50);
-}
-
-function cancelIdle(handle: number): void {
-  if (typeof cancelIdleCallback === "function") cancelIdleCallback(handle);
-  clearTimeout(handle);
+  return () => clearTimeout(id);
 }

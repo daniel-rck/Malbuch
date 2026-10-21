@@ -48,12 +48,23 @@ export class Autosave {
     this.#previewTimer = setTimeout(() => void this.#savePreview(), PREVIEW_DELAY);
   }
 
-  /** Save whatever is pending now: page switch, picture book, app in the background. */
+  /** The page opened without a preview of its whole log: save one after a pause. */
+  schedulePreview(): void {
+    clearTimeout(this.#previewTimer);
+    this.#previewTimer = setTimeout(() => void this.#savePreview(), PREVIEW_DELAY);
+  }
+
+  /**
+   * Save whatever is pending now: page switch, picture book, app in the
+   * background. The preview reads the canvas before anything is awaited, so a
+   * caller may clear or repaint it right after this returns its promise.
+   */
   async flush(): Promise<void> {
     clearTimeout(this.#opsTimer);
     clearTimeout(this.#previewTimer);
+    const preview = this.#savePreview();
     await this.#saveOps();
-    await this.#savePreview();
+    await preview;
   }
 
   dispose(): void {
@@ -64,13 +75,15 @@ export class Autosave {
   async #saveOps(): Promise<void> {
     if (!this.#opsDirty) return;
     this.#opsDirty = false;
-    await saveOps({
+    const ok = await saveOps({
       id: this.#pageId,
       labelsKey: this.#labelsKey,
       ops: [...this.#canvas.ops],
       ...(this.#base ? { base: this.#base } : {}),
       updatedAt: Date.now(),
     });
+    // Try again with the next change or flush, unless a newer write is due anyway.
+    if (!ok) this.#opsDirty = true;
   }
 
   async #savePreview(): Promise<void> {
@@ -88,14 +101,10 @@ export class Autosave {
     const thumbPromise = thumbnailPng(this.#paint);
     try {
       const [png, thumb] = await Promise.all([pngPromise, thumbPromise]);
-      const ok = await savePreview({
-        id: this.#pageId,
-        png: await png.arrayBuffer(),
-        opCount,
-        digest,
-        thumb: await thumb.arrayBuffer(),
-        updatedAt: Date.now(),
-      });
+      const ok = await savePreview(
+        { id: this.#pageId, png: await png.arrayBuffer(), opCount, digest, updatedAt: Date.now() },
+        await thumb.arrayBuffer(),
+      );
       if (ok) this.#previewDigest = digest;
     } catch (error) {
       console.warn("Malbuch: could not render the preview", error);

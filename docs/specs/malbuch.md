@@ -176,7 +176,8 @@ IndexedDB `malbuch` (`src/lib/db/db.ts`), Bilder als PNG-`ArrayBuffer`:
 | Store | Inhalt | geschrieben |
 |---|---|---|
 | `ops` | `{ id, labelsKey, ops, base? }` | 400 ms nach jeder Op |
-| `previews` | `{ id, png, opCount, digest, thumb }`: Malschicht in voller Größe + Thumbnail | nach 3 s Pause, bei Seitenwechsel, Bilderbuch und `visibilitychange: hidden` |
+| `previews` | `{ id, png, opCount, digest }`: Malschicht in voller Größe | nach 3 s Pause, bei Seitenwechsel, Bilderbuch und `visibilitychange: hidden`; beim Öffnen ohne passende Vorschau nach 3 s |
+| `thumbs` | `{ id, thumb, digest }`: Thumbnail fürs Bilderbuch (seit DB v2; das Bilderbuch lädt keine Vollbilder) | mit der Vorschau, in einer Transaktion |
 | `labels` | Labels RLE-kodiert + Boxen, Schlüssel `<seite>:<svg-hash>:v<schema>:s<scale>` | einmal pro Zeichnung |
 | `settings` | Werkzeug, Farbe, Größe, letzte Seite | 300 ms nach Änderung |
 
@@ -185,8 +186,16 @@ IndexedDB `malbuch` (`src/lib/db/db.ts`), Bilder als PNG-`ArrayBuffer`:
   danach werden nur die übrigen Ops abgespielt.
 - **Geänderte Zeichnung:** Region-IDs hängen an der Rasterung. Ändert sich der Label-Schlüssel
   einer Seite mit Ops, werden die alten Ops einmal mit den alten Labels gerendert; das Ergebnis
-  wird `base`, das Log beginnt neu, die alten Labels werden gelöscht.
-- Schreibfehler (Quota) werden geschluckt und geloggt, die App läuft weiter.
+  wird `base`, das Log beginnt neu, die alten Labels werden gelöscht — erst wenn das neue Log
+  gespeichert ist; sonst bleibt alles für den nächsten Versuch.
+- Schreibfehler (Quota) werden geschluckt und geloggt, die App läuft weiter; ein fehlgeschlagener
+  Op-Log-Schreibversuch wird beim nächsten Speichern wiederholt.
+- Ein Lesefehler des Op-Logs ist **kein** leeres Log: einmal neu lesen, sonst öffnet die Seite
+  nicht (ein leerer Start würde das gespeicherte Log beim nächsten Strich überschreiben).
+- `flush()` liest die Malschicht, bevor es auf irgendetwas wartet: der Seitenwechsel darf sie
+  gleich danach leeren.
+- Beim Start wird `navigator.storage.persist()` angefragt, damit der Browser die Bilder nicht
+  verdrängt.
 
 ## 6. Ausmalbilder-Konvention
 
@@ -297,5 +306,7 @@ Mit ✓ markiert: automatisiert in Chromium geprüft (Playwright, 2026-10-20).
 - _2026-10-21_ — Splitter-Regel bleibt, aber gezeichnete Formen brauchen ≥ 150 Dok-px² (§6):
   9 Bilder hatten Sterne, Wangen, Blüten, Schnäbel … darunter — ein Tipp malte die Nachbarfläche.
   `/dev/seiten` zeigt verworfene Flächen jetzt orange; die Bilder sind angepasst.
+- _2026-10-21_ — Thumbnails in eigenem Store (DB v2); Op-Log-Lesefehler öffnen die Seite nicht
+  statt leer; die Vorschau wird vor dem Warten aufs Op-Log gelesen.
 - _2026-10-20_ — Spec bleibt Deutsch (web-base empfiehlt Englisch für `docs/specs/`; in
   web-base 08 als Abweichung vermerkt).

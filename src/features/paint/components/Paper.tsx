@@ -76,19 +76,22 @@ export function Paper({ onSession }: { onSession: (session: Session | null) => v
         });
         loaded.snapshot?.image.close();
         canvas.warmUp();
+        const previewDigest =
+          loaded.snapshot?.opCount === loaded.ops.length ? loaded.snapshot.digest : null;
         const autosave = new Autosave({
           pageId: page.id,
           labelsKey: loaded.labelsKey,
           base: loaded.base?.png,
           canvas,
           paint,
-          previewDigest:
-            loaded.snapshot?.opCount === loaded.ops.length ? loaded.snapshot.digest : null,
+          previewDigest,
         });
+        // Replayed beyond the stored preview: store this state for a fast next start.
+        if (!previewDigest && loaded.ops.length > 0) autosave.schedulePreview();
         const unsubscribe = canvas.subscribe(() => autosave.changed());
         teardown = () => {
-          // flush() reads the canvases before it awaits anything, so the next
-          // page may paint right after.
+          // flush() reads the paint canvas before it awaits anything, so it
+          // may be cleared and the next page may paint right after.
           void autosave.flush();
           autosave.dispose();
           unsubscribe();

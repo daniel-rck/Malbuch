@@ -1,8 +1,11 @@
+import { deleteDB, openDB } from "idb";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { clearAll, getDB } from "../../lib/db/db.ts";
+import { type AppSchema, clearAll, getDB, upgrade } from "../../lib/db/db.ts";
 import {
+  deletePreview,
   loadLabels,
   loadOps,
+  loadPreview,
   loadSettings,
   loadThumbs,
   pruneLabels,
@@ -50,21 +53,46 @@ describe("paint storage", () => {
     ]);
   });
 
-  it("lists the thumbnails by page", async () => {
+  it("writes a preview and its thumbnail together, and deletes both", async () => {
     const thumb = new Uint8Array([1, 2, 3]).buffer;
-    await savePreview({
-      id: "fisch",
-      png: new ArrayBuffer(4),
-      opCount: 0,
-      digest: "x",
-      thumb,
-      updatedAt: 1,
-    });
+    const record = { id: "fisch", png: new ArrayBuffer(4), opCount: 0, digest: "x", updatedAt: 1 };
+    await savePreview(record, thumb);
     const thumbs = await loadThumbs();
-    expect([...thumbs.keys()]).toEqual(["fisch"]);
-    expect(new Uint8Array(thumbs.get("fisch") ?? new ArrayBuffer(0))).toEqual(
+    expect(thumbs.map((t) => [t.id, t.digest])).toEqual([["fisch", "x"]]);
+    expect(new Uint8Array(thumbs[0]?.thumb ?? new ArrayBuffer(0))).toEqual(
       new Uint8Array([1, 2, 3]),
     );
+    expect((await loadPreview("fisch"))?.opCount).toBe(0);
+    await deletePreview("fisch");
+    expect(await loadThumbs()).toEqual([]);
+    expect(await loadPreview("fisch")).toBeUndefined();
+  });
+
+  it("moves v1 thumbnails into their own store on the upgrade to v2", async () => {
+    const name = "malbuch-upgrade-test";
+    const v1 = await openDB(name, 1, {
+      upgrade: (db) => db.createObjectStore("previews", { keyPath: "id" }),
+    });
+    const thumb = new Uint8Array([7]).buffer;
+    await v1.put("previews", {
+      id: "zug",
+      png: new ArrayBuffer(2),
+      opCount: 3,
+      digest: "d",
+      thumb,
+      updatedAt: 5,
+    });
+    v1.close();
+    const v2 = await openDB<AppSchema>(name, 2, { upgrade });
+    const moved = await v2.get("thumbs", "zug");
+    v2.close();
+    await deleteDB(name);
+    expect(moved && { ...moved, thumb: [...new Uint8Array(moved.thumb)] }).toEqual({
+      id: "zug",
+      thumb: [7],
+      digest: "d",
+      updatedAt: 5,
+    });
   });
 
   it("keeps the settings", async () => {

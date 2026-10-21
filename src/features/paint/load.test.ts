@@ -8,6 +8,15 @@ import { grid } from "./engine/test/grid.ts";
 import { labelsKeyFor, loadPage } from "./load.ts";
 
 // jsdom has no canvas: decoding PNGs is faked; labels come from the cache.
+// The op log's read and write are the real ones, but a test can make them fail.
+vi.mock("./db.ts", async (importOriginal) => {
+  const db = await importOriginal<typeof import("./db.ts")>();
+  return {
+    ...db,
+    loadOps: vi.fn<typeof db.loadOps>(db.loadOps),
+    saveOps: vi.fn<typeof db.saveOps>(db.saveOps),
+  };
+});
 vi.mock("./render/png.ts", () => ({
   pngToImage: vi.fn<(png: ArrayBuffer) => Promise<unknown>>(async (png) => ({ png, close() {} })),
   canvasToPng: vi.fn<() => Promise<Blob>>(),
@@ -22,14 +31,16 @@ const red: Op = { t: "fill", color: "#E53935", region: 1 };
 const blue: Op = { t: "fill", color: "#1E88E5", region: 1 };
 
 async function preview(ops: Op[], opCount: number) {
-  await savePreview({
-    id: "drache",
-    png: new Uint8Array([opCount]).buffer,
-    opCount,
-    digest: opsDigest(ops, opCount),
-    thumb: new ArrayBuffer(1),
-    updatedAt: 1,
-  });
+  await savePreview(
+    {
+      id: "drache",
+      png: new Uint8Array([opCount]).buffer,
+      opCount,
+      digest: opsDigest(ops, opCount),
+      updatedAt: 1,
+    },
+    new ArrayBuffer(1),
+  );
 }
 
 beforeEach(async () => {
@@ -67,5 +78,28 @@ describe("loadPage", () => {
     expect(new Uint8Array(loaded.base?.png ?? new ArrayBuffer(0))).toEqual(new Uint8Array([1]));
     expect((await loadOps("drache"))?.labelsKey).toBe(key);
     expect(await loadPreview("drache")).toBeUndefined();
+  });
+
+  it("keeps the old log and its preview while the start image can't be stored", async () => {
+    const old = "drache:old-art:v1:s1.5";
+    await saveOps({ id: "drache", labelsKey: old, ops: [red], updatedAt: 1 });
+    await preview([red], 1);
+    vi.mocked(saveOps).mockResolvedValueOnce(false);
+    const loaded = await loadPage(page);
+    // The picture still shows (the preview became the start image) …
+    expect(new Uint8Array(loaded.base?.png ?? new ArrayBuffer(0))).toEqual(new Uint8Array([1]));
+    // … and nothing it was made from is gone, so the next start tries again.
+    expect((await loadOps("drache"))?.labelsKey).toBe(old);
+    expect(await loadPreview("drache")).toBeDefined();
+  });
+
+  it("reads the op log once more, and fails rather than open the page empty", async () => {
+    await saveOps({ id: "drache", labelsKey: key, ops: [red], updatedAt: 1 });
+    vi.mocked(loadOps).mockRejectedValueOnce(new Error("connection lost"));
+    expect((await loadPage(page)).ops).toEqual([red]);
+    vi.mocked(loadOps)
+      .mockRejectedValueOnce(new Error("connection lost"))
+      .mockRejectedValueOnce(new Error("connection lost"));
+    await expect(loadPage(page)).rejects.toThrow("connection lost");
   });
 });

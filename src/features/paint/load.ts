@@ -1,3 +1,4 @@
+import type { OpsRecord } from "../../lib/db/db.ts";
 import type { Page } from "../../pages/manifest.ts";
 import {
   LABEL_SCHEMA,
@@ -55,20 +56,24 @@ async function regionsFor(page: Page, key: string): Promise<Regions> {
 export async function loadPage(page: Page): Promise<LoadedPage> {
   const labelsKey = labelsKeyFor(page);
   const regions = await regionsFor(page, labelsKey);
-  let record = await loadOps(page.id);
+  let record = await readLog(page.id);
   let preview = await loadPreview(page.id);
+  const keep = [labelsKey];
 
   if (record && record.labelsKey !== labelsKey) {
     // The art (or the labelling) changed since these ops were painted: their
     // region ids mean nothing now. Render them once with the labels they were
     // made with; the result becomes the page's start image.
-    const base = await renderWithOldLabels(record.labelsKey, record.ops, record.base, preview?.png);
+    const oldKey = record.labelsKey;
+    const base = await renderWithOldLabels(oldKey, record.ops, record.base, preview?.png);
     record = { id: page.id, labelsKey, ops: [], base, updatedAt: Date.now() };
-    await saveOps(record);
-    await deletePreview(page.id);
+    if (await saveOps(record)) await deletePreview(page.id);
+    // Not stored: the old log is still there, so its labels and preview stay
+    // for the next try.
+    else keep.push(oldKey);
     preview = undefined;
   }
-  void pruneLabels(page.id, [labelsKey]);
+  void pruneLabels(page.id, keep);
 
   const ops = record?.ops ?? [];
   const base = record?.base ? { png: record.base, image: await pngToImage(record.base) } : null;
@@ -88,6 +93,20 @@ export async function loadPage(page: Page): Promise<LoadedPage> {
   return { page, labelsKey, regions, ops, base, snapshot };
 }
 
+/**
+ * The op log, read once more if the first read fails (Safari drops idle
+ * connections); a second failure stops the page from opening rather than
+ * letting it start empty and overwrite the stored log.
+ */
+async function readLog(id: string): Promise<OpsRecord | undefined> {
+  try {
+    return await loadOps(id);
+  } catch (error) {
+    console.warn("Malbuch: could not read the op log, trying again", error);
+    return await loadOps(id);
+  }
+}
+
 async function renderWithOldLabels(
   key: string,
   ops: Op[],
@@ -100,12 +119,14 @@ async function renderWithOldLabels(
   const paint = createCanvas(RASTER_W, RASTER_H);
   const live = createCanvas(RASTER_W, RASTER_H);
   const masks = new MaskCache(old);
+  let image: ImageBitmap | null = null;
   try {
-    const image = base ? await pngToImage(base) : null;
+    image = base ? await pngToImage(base) : null;
     const canvas = new PageCanvas({ paint, live, regions: old, masks, ops: [...ops], base: image });
     canvas.dispose();
     return await (await canvasToPng(paint)).arrayBuffer();
   } finally {
+    image?.close();
     masks.dispose();
     releaseCanvas(paint);
     releaseCanvas(live);
