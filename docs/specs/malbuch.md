@@ -37,6 +37,8 @@ Eltern nur für „Bild speichern".
 | Autosave | Pro Seite in IndexedDB: Op-Log nach jeder Operation, Vorschau nach Pause/Wechsel (§5.5) |
 | Bild speichern | Gemaltes Bild + Linien als PNG (1200 × 1500); Web Share API, Fallback Download. Ebenfalls Gedrückthalten — das Teilen-Menü ist Sache der Eltern |
 | Neue Version | Nur wenn eine wartet: Icon „Neu laden" oben (kein Text-Toast) |
+| Überraschungsbilder | Jeder Maltag packt neue Bilder aus (§3.2); noch verpackte sind Geschenke im Bilderbuch |
+| Stickerheft | Stern-Knopf neben dem Bilderbuch; gewonnene Sticker mit Konfetti und kurzer Melodie (§3.3) |
 | PWA | Installierbar, vollständig offline, Fullscreen, kein Pinch-Zoom/Scroll-Bounce |
 
 ### 3.1 Altersgruppen
@@ -52,9 +54,47 @@ Quelle: `src/pages/groups.ts`.
 | `mittel` · 5–6 Jahre | mittlere Figur | alle 16 | 16 / 30 / 52 | 30 |
 | `gross` · 7–8 Jahre | große Figur | alle 16 | 8 / 16 / 30 / 52 | 16 |
 
+### 3.2 Überraschungsbilder
+
+21 der 42 Bilder sind am Anfang verpackt: je Altersgruppe eins pro **Maltag** 1–7
+(`unlockDay` in `src/pages/meta.ts`). Ein Maltag ist ein Kalendertag (lokal), an dem das Kind
+Farbe aufs Papier bringt (Strich oder Farbeimer); Seite öffnen, Rückgängig oder Radieren zählen
+nicht. Nach dem n-ten Maltag sind die Bilder der Tage 1…n offen — gezählt werden Maltage, nicht
+Kalendertage, eine Woche Pause kostet also nichts. Der allererste Strich packt Tag 1 sofort aus.
+
+- Verpackt: Geschenk-Kachel mit einem Punkt je nötigem Maltag (gefüllt = geschafft); Tippen
+  lässt sie wackeln, öffnet aber nichts.
+- Frisch ausgepackt: Glitzer am Bild, am Alters-Reiter und am Bilderbuch-Knopf, bis das Bild
+  einmal geöffnet war.
+- Beim Auspacken: Geschenk + die neuen Bilder springen in die Mitte und fliegen zum Bilderbuch.
+
+### 3.3 Sticker
+
+22 Sticker in vier Reihen (`src/features/rewards/engine/stickers.ts`), jeder ein Bild ohne
+Text; Stufen einer Serie zeigen goldene Sterne:
+
+| Reihe | Sticker |
+|---|---|
+| Bilder | 1 / 5 / 10 / 25 Bilder fertig · ein Bild ganz ausgemalt · alle Bilder einer Altersgruppe (×3) |
+| Stifte und Farben | Stift, Farbeimer und Radierer ausprobiert · ein Bild nur mit dem Stift · 8 Farben in einem Bild · alle 16 Farben |
+| Maltage | 3 / 7 / 14 Maltage · an jedem Wochentag · Samstag und Sonntag |
+| Entdecken | alle drei Altersgruppen · ein Überraschungsbild gemalt · alle Überraschungen ausgepackt · aus jeder Überraschung eins |
+
+- **Fertig** = ≥ 75 % der Flächen haben Farbe (Farbeimer oder ein in die Fläche geclippter
+  Strich seit dem letzten „Alles löschen"); **ganz ausgemalt** = 100 %. Der Radierer zählt nicht
+  (er ist nicht an Flächen gebunden). Gemerkt wird der beste Stand: Rückgängig nimmt nichts weg.
+- Ein Sticker bleibt für immer. Neue tragen Glitzer am Stickerheft-Knopf und im Heft, bis das
+  Heft wieder zugeht.
+- Im Heft: gewonnene bunt (Tippen: wackeln + Melodie), offene als graue Umrisse mit Punkten
+  (≤ 7 Schritte) oder Balken für den Fortschritt.
+- **Feier:** kurze Melodie (WebAudio-Dreiklang, keine Audiodatei), der Sticker springt groß ins
+  Bild, Konfetti, dann fliegt er zum Knopf (≈ 2,3 s). Mehrere nacheinander. Die Feier nimmt
+  keine Eingaben — weitermalen geht. Mit `prefers-reduced-motion`: kein Konfetti, kein Flug.
+  Der Ton lässt sich nicht abschalten, solange es keinen Elternbereich gibt.
+
 ### Später (nicht im MVP)
 
-Stempel/Sticker · Glitzer- und Regenbogenstift · Zeitraffer-Replay des Malprozesses
+Stempel · Glitzer- und Regenbogenstift · Zeitraffer-Replay des Malprozesses
 (fällt aus dem Op-Log fast gratis ab) · Seitenpakete nachladen · Elternbereich mit Galerie.
 
 ## 4. Stack
@@ -91,9 +131,13 @@ src/
       masks.ts       Masken-Cache  rasterize.ts  png.ts  canvas.ts
     components/      TopBar, Paper, Tray, PagePicker, PageThumb, icons
     PaintPage.tsx    state.ts  db.ts  load.ts  autosave.ts  share.ts  config.ts
+  features/rewards/  Überraschungsbilder und Sticker (§3.2–3.3)
+    engine/          reines TS: unlock.ts, progress.ts (Fortschritt, Flächenanteil), stickers.ts
+    components/      StickerBook, Celebration, StickerArt
+    state.ts  db.ts  tracking.ts (folgt dem Op-Log der offenen Seite)  sound.ts
   features/dev/      /dev/seiten (nur Dev-Build)
   pages/             Ausmalbilder
-    meta.ts          Liste {id, name, group}
+    meta.ts          Liste {id, name, group, unlockDay?}
     groups.ts        Altersgruppen
     manifest.ts      Seiten mit SVG-Text (?raw)
     check.ts         Seiten-Konvention als Prüfung
@@ -180,6 +224,7 @@ IndexedDB `malbuch` (`src/lib/db/db.ts`), Bilder als PNG-`ArrayBuffer`:
 | `thumbs` | `{ id, thumb, digest }`: Thumbnail fürs Bilderbuch (seit DB v2; das Bilderbuch lädt keine Vollbilder) | mit der Vorschau, in einer Transaktion |
 | `labels` | Labels RLE-kodiert + Boxen, Schlüssel `<seite>:<svg-hash>:v<schema>:s<scale>` | einmal pro Zeichnung |
 | `settings` | Werkzeug, Farbe, Größe, letzte Seite | 300 ms nach Änderung |
+| `progress` | eine Zeile: Maltage, je Seite bester Flächenanteil/Farben/Werkzeuge, Sticker (`earned`, `fresh`), geöffnete Überraschungen (seit DB v3) | 300 ms nach Änderung, bei `visibilitychange: hidden` |
 
 - **Schneller Start:** der Snapshot wird nur gezeichnet, wenn sein `digest` dem der ersten
   `opCount` Ops entspricht (die Länge allein reicht nicht: Undo + neuer Strich = gleiche Länge);
@@ -194,6 +239,10 @@ IndexedDB `malbuch` (`src/lib/db/db.ts`), Bilder als PNG-`ArrayBuffer`:
   nicht (ein leerer Start würde das gespeicherte Log beim nächsten Strich überschreiben).
 - `flush()` liest die Malschicht, bevor es auf irgendetwas wartet: der Seitenwechsel darf sie
   gleich danach leeren.
+- **Fortschritt nachholen:** fehlt die `progress`-Zeile (erster Start mit DB v3), wird sie aus
+  den Op-Logs gefüllt — Seiten, Farben, Werkzeuge, als Maltag der Tag der letzten Änderung jedes
+  bemalten Bilds. Der Flächenanteil folgt beim nächsten Öffnen der Seite (er braucht die Labels);
+  so gewonnene Sticker kommen ohne Feier, nur mit Glitzer.
 - Beim Start wird `navigator.storage.persist()` angefragt, damit der Browser die Bilder nicht
   verdrängt.
 
@@ -209,6 +258,8 @@ Jedes Bild ist `src/pages/<gruppe>/<id>.svg`, eingetragen in `src/pages/meta.ts`
 - Text (Sprechblasen) als `<text>` mit `fill="#1E2238" stroke="none"`,
   `font-family="Arial, Helvetica, sans-serif"`, ≥ 15 % Luft in der Blase (Schriften variieren).
 - Nur eigene Figuren – keine bekannten Charaktere, Marken, Logos.
+- Überraschungsbilder tragen `unlockDay` (1–7) in `meta.ts`, je Gruppe genau eins pro Tag, und
+  stehen hinter den übrigen Bildern ihrer Gruppe (§3.2).
 
 Je Altersgruppe:
 
@@ -232,13 +283,25 @@ Buchstaben-Innenräume und dünne Splitter (< 30 Dok-px², höchstens ~5 px brei
 Nachbarn decken sie) sein. Eine ausgelaufene Fläche zeigt sich als ein Farbton, der sich über
 mehrere Flächen zieht.
 
-**Bestand (21 Seiten):**
+**Bestand (42 Seiten):**
 
 | Gruppe | Seiten |
 |---|---|
 | 3–4 | Fisch, Haus, Schmetterling, Ente, Auto, Eis |
 | 5–6 | Drache (Prototyp), Zug, Krake im Meer, Schloss, Dino am Vulkan, Feuerwehrauto, Bauernhof |
 | 7–8 | Roboter und Katze, Weltraum (beide Prototyp), Piratenschiff, Baumhaus, Dschungel, Mandala, Zirkus, Picknick-Comic |
+
+Überraschungsbilder, nach Maltag (Thema):
+
+| Tag | Thema | 3–4 | 5–6 | 7–8 |
+|---|---|---|---|---|
+| 1 | Tiere | Katze | Igel im Laub | Zoo |
+| 2 | Fahrzeuge | Boot | Bagger | Bahnhof |
+| 3 | Meer | Schildkröte | Leuchtturm | Korallenriff |
+| 4 | Garten | Blume | Marienkäfer | Gemüsegarten |
+| 5 | Fantasie | Einhorn | Zauberer | Zauberwald |
+| 6 | Wetter | Sonne und Regenbogen | Schneemann | Vier Jahreszeiten |
+| 7 | Feiern | Kuchen | Geschenke | Geburtstag |
 
 ## 7. Design
 
@@ -253,11 +316,14 @@ Im Querformat ab 760 px Breite und auf jedem Handy im Querformat wandert die Abl
 den Platz: Knöpfe 48 px, engere Abstände, die Farben in **einer** Reihe, die seitlich scrollt
 (die gewählte bleibt im Blick, ein weicher Rand zeigt „da ist noch mehr"); im Querformat sitzt die
 Kopfleiste über der Ablage und das Papier nimmt die volle Höhe. Tablets bleiben unverändert.
-Kopfleiste: Bilderbuch links, rechts Rückgängig und Speichern, mit Abstand der Papierkorb.
+Kopfleiste: Bilderbuch und Stickerheft links, rechts Rückgängig und Speichern, mit Abstand der
+Papierkorb. Sticker sind gewellte Plaketten in der Farbe ihrer Reihe (Rosa, Türkis, Orange,
+Hellgrün); „neu" ist ein sonnengelber Glitzerstern.
 Kein Pinch-Zoom: `touch-action: none` auf `body` (iOS ignoriert `user-scalable=no`), nur
 Scrollflächen erlauben `pan-x`/`pan-y`.
 Farbkleckse 48–72 px, alle Bedienelemente ≥ 48 px. `prefers-reduced-motion` (Reset in
-`tokens.css`) und Safe-Area-Insets beachten. App-Icon: `assets/icon.svg` → `public/icon-*.png`.
+`tokens.css`; die Feier lässt dann zusätzlich Konfetti und Flug weg) und Safe-Area-Insets
+beachten. App-Icon: `assets/icon.svg` → `public/icon-*.png`.
 
 ## 8. Performance-Budgets (Mittelklasse-Tablet, Scale 1.5)
 
@@ -290,7 +356,8 @@ Mit ✓ markiert: automatisiert in Chromium geprüft (Playwright, 2026-10-20).
 
 ## 10. Offene Fragen
 
-- Seitenpakete später nachladbar oder alles im Bundle? (Heute: alle 21 SVGs im JS-Bundle.)
+- Seitenpakete später nachladbar oder alles im Bundle? (Heute: alle 42 SVGs im JS-Bundle.)
+- Elternbereich: Ton aus, Fortschritt zurücksetzen, alle Überraschungen sofort öffnen?
 - Stempel als Extra für 7–8?
 
 ## 11. Entscheidungslog
@@ -319,5 +386,13 @@ Mit ✓ markiert: automatisiert in Chromium geprüft (Playwright, 2026-10-20).
 - _2026-10-21_ — „Alles löschen" und „Bild speichern" per Gedrückthalten statt Tippen.
 - _2026-10-21_ — Thumbnails in eigenem Store (DB v2); Op-Log-Lesefehler öffnen die Seite nicht
   statt leer; die Vorschau wird vor dem Warten aufs Op-Log gelesen.
+- _2026-10-21_ — Überraschungsbilder und Sticker gegen Langeweile: 21 neue Bilder, je Maltag
+  eins pro Altersgruppe. Gezählt werden **Maltage** statt Wochentage — kein Bild verschwindet,
+  eine Pause kostet nichts, Uhr verstellen bringt nur einen neuen Tag.
+- _2026-10-21_ — „Fertig" = ≥ 75 % der Flächen (Farbeimer oder geclippter Strich), Radierer
+  ignoriert; bester Stand gemerkt, Sticker werden nie entzogen.
+- _2026-10-21_ — Feier mit WebAudio-Melodie statt Audiodatei (nichts zu precachen); der Ton ist
+  bis zu einem Elternbereich immer an. Fortschritt als eine Zeile im Store `progress` (DB v3),
+  beim Upgrade aus den Op-Logs nachgeholt.
 - _2026-10-20_ — Spec bleibt Deutsch (web-base empfiehlt Englisch für `docs/specs/`; in
   web-base 08 als Abweichung vermerkt).

@@ -104,6 +104,22 @@ export function checkManifest(
   for (const file of files) {
     if (!expected.has(file)) problems.push(`${file} is not listed in src/pages/meta.ts`);
   }
+  // Surprise pages: each painting day 1–7 opens exactly one page per group.
+  for (const page of meta) {
+    const day = page.unlockDay;
+    if (day !== undefined && !(Number.isInteger(day) && day >= 1 && day <= 7)) {
+      problems.push(`page ${page.id}: unlockDay ${day} is not 1–7`);
+    }
+  }
+  if (meta.some((p) => p.unlockDay !== undefined)) {
+    for (const group of groups) {
+      for (let day = 1; day <= 7; day++) {
+        const n = meta.filter((p) => p.group === group.id && p.unlockDay === day).length;
+        if (n !== 1)
+          problems.push(`group ${group.id} has ${n} pages for unlockDay ${day}, wants 1`);
+      }
+    }
+  }
   return problems;
 }
 

@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1000" width="800" height="1000">
+  <!-- Schneemann -->
+  <g fill="#fff" stroke="#1E2238" stroke-width="7" stroke-linejoin="round" stroke-linecap="round">
+    <rect x="20" y="20" width="760" height="960" rx="28"/>
+    <path d="M116 170 A21 21 0 0 1 123 135 A29.4 29.4 0 0 1 186 110.5 A31.5 31.5 0 0 1 242 121 A24.5 24.5 0 0 1 284 170 Z"/>
+    <rect x="122" y="710" width="36" height="70"/>
+    <polygon points="140,440 80,570 200,570"/>
+    <polygon points="140,530 54,660 226,660"/>
+    <polygon points="140,620 28,750 252,750"/>
+    <rect x="644" y="680" width="36" height="70"/>
+    <polygon points="662,410 602,540 722,540"/>
+    <polygon points="662,500 576,630 748,630"/>
+    <polygon points="662,590 550,720 774,720"/>
+    <path d="M20 780 Q90 758 160 780 Q230 802 300 780 Q370 758 440 780 Q510 802 580 780 Q650 758 720 780 Q750 802 780 780 L780 952 A28 28 0 0 1 752 980 L48 980 A28 28 0 0 1 20 952 Z"/>
+    <circle cx="400" cy="780" r="150"/>
+    <circle cx="400" cy="560" r="110"/>
+    <circle cx="400" cy="380" r="85"/>
+    <path fill="none" d="M300 520 L180 440 M210 460 L190 420 M500 520 L620 440 M590 460 L615 420"/>
+    <circle cx="400" cy="520" r="12" fill="#1E2238"/>
+    <circle cx="400" cy="580" r="12" fill="#1E2238"/>
+    <circle cx="400" cy="640" r="12" fill="#1E2238"/>
+    <circle cx="400" cy="740" r="12" fill="#1E2238"/>
+    <circle cx="400" cy="820" r="12" fill="#1E2238"/>
+    <circle cx="370" cy="365" r="11" fill="#1E2238"/>
+    <circle cx="430" cy="365" r="11" fill="#1E2238"/>
+    <polygon points="398,378 495,402 398,420"/>
+    <circle cx="365" cy="425" r="5" fill="#1E2238"/>
+    <circle cx="390" cy="430" r="5" fill="#1E2238"/>
+    <circle cx="410" cy="430" r="5" fill="#1E2238"/>
+    <circle cx="430" cy="425" r="5" fill="#1E2238"/>
+    <path d="M318 440 Q400 480 482 440 L486 478 Q400 520 314 478 Z"/>
+    <path d="M430 480 L470 480 L480 590 L436 590 Z"/>
+    <path fill="none" d="M444 590 L442 610 M458 590 L459 612 M472 590 L475 610"/>
+    <rect x="335" y="290" width="130" height="30" rx="8"/>
+    <rect x="355" y="190" width="90" height="105" rx="6"/>
+    <path fill="none" d="M355 265 L445 265"/>
+    <circle cx="200" cy="300" r="17"/>
+    <circle cx="560" cy="220" r="17"/>
+    <circle cx="620" cy="330" r="17"/>
+    <circle cx="260" cy="600" r="17"/>
+    <circle cx="700" cy="640" r="17"/>
+    <circle cx="150" cy="380" r="17"/>
+    <circle cx="330" cy="120" r="17"/>
+  </g>
+</svg>

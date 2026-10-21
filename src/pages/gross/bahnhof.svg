@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1000" width="800" height="1000">
+  <!-- Bahnhof -->
+  <g fill="#fff" stroke="#1E2238" stroke-width="6" stroke-linejoin="round" stroke-linecap="round">
+    <rect x="20" y="20" width="760" height="960" rx="28"/>
+    <path d="M548 150 A18 18 0 0 1 554 120 A25.2 25.2 0 0 1 608 99 A27 27 0 0 1 656 108 A21 21 0 0 1 692 150 Z"/>
+    <path d="M196 100 A13.5 13.5 0 0 1 200.5 77.5 A18.9 18.9 0 0 1 241 61.8 A20.2 20.2 0 0 1 277 68.5 A15.8 15.8 0 0 1 304 100 Z"/>
+    <path fill="none" d="M480 230 Q495 215 510 230 Q525 215 540 230"/>
+    <rect x="60" y="300" width="360" height="300"/>
+    <polygon points="40,305 240,165 440,305"/>
+    <circle cx="240" cy="245" r="44"/>
+    <path fill="none" d="M240 245 L240 215 M240 245 L262 255"/>
+    <circle cx="240" cy="245" r="6" fill="#1E2238"/>
+    <path d="M90 520 L90 400 Q125 355 160 400 L160 520 Z"/>
+    <path fill="none" d="M125 378 L125 520 M90 450 L160 450"/>
+    <path d="M320 520 L320 400 Q355 355 390 400 L390 520 Z"/>
+    <path fill="none" d="M355 378 L355 520 M320 450 L390 450"/>
+    <path d="M195 600 L195 440 Q240 390 285 440 L285 600 Z"/>
+    <path fill="none" d="M240 418 L240 600"/>
+    <circle cx="228" cy="520" r="6" fill="#1E2238"/>
+    <circle cx="252" cy="520" r="6" fill="#1E2238"/>
+    <rect x="480" y="360" width="24" height="245" rx="6"/>
+    <rect x="750" y="360" width="24" height="245" rx="6"/>
+    <polygon points="440,330 780,330 780,375 460,375"/>
+    <path fill="none" d="M560 600 L560 445"/>
+    <path d="M538 445 L582 445 L572 410 L548 410 Z"/>
+    <rect x="615" y="545" width="115" height="16" rx="4"/>
+    <path fill="none" d="M630 561 L630 600 M715 561 L715 600"/>
+    <rect x="625" y="505" width="95" height="40" rx="8"/>
+    <rect x="20" y="600" width="760" height="48"/>
+    <path fill="none" d="M20 624 L780 624"/>
+    <path d="M20 648 Q400 648 780 648 L780 952 A28 28 0 0 1 752 980 L48 980 A28 28 0 0 1 20 952 Z"/>
+    <rect x="20" y="805" width="760" height="16"/>
+    <rect x="20" y="838" width="760" height="16"/>
+    <rect x="90" y="640" width="150" height="145" rx="10"/>
+    <rect x="112" y="662" width="106" height="60" rx="8"/>
+    <rect x="72" y="622" width="186" height="26" rx="8"/>
+    <rect x="240" y="690" width="210" height="95" rx="18"/>
+    <path fill="none" d="M300 690 L300 785 M360 690 L360 785"/>
+    <path d="M392 690 L384 650 L438 650 L430 690 Z"/>
+    <rect x="378" y="630" width="66" height="24" rx="8"/>
+    <path d="M450 715 L478 705 L478 785 L450 785 Z"/>
+    <rect x="500" y="680" width="250" height="105" rx="12"/>
+    <rect x="520" y="698" width="56" height="45" rx="8"/>
+    <rect x="597" y="698" width="56" height="45" rx="8"/>
+    <rect x="674" y="698" width="56" height="45" rx="8"/>
+    <path fill="none" d="M478 765 L500 765"/>
+    <circle cx="150" cy="761" r="44"/>
+    <circle cx="150" cy="761" r="16.7"/>
+    <circle cx="250" cy="775" r="30"/>
+    <circle cx="250" cy="775" r="11.4"/>
+    <circle cx="330" cy="775" r="30"/>
+    <circle cx="330" cy="775" r="11.4"/>
+    <circle cx="410" cy="775" r="30"/>
+    <circle cx="410" cy="775" r="11.4"/>
+    <circle cx="560" cy="775" r="30"/>
+    <circle cx="560" cy="775" r="11.4"/>
+    <circle cx="690" cy="775" r="30"/>
+    <circle cx="690" cy="775" r="11.4"/>
+    <rect x="80" y="895" width="90" height="60" rx="10"/>
+    <path d="M105 895 L105 878 L145 878 L145 895"/>
+    <path fill="none" d="M80 922 L170 922"/>
+    <path d="M560 930 Q590 890 640 905 Q670 880 690 900 Q675 915 660 915 Q640 950 590 945 Z"/>
+    <circle cx="673" cy="897" r="5" fill="#1E2238"/>
+    <polygon fill="#1E2238" points="690,900 708,905 690,910"/>
+    <path fill="none" d="M600 945 L595 960 M620 946 L620 962"/>
+  </g>
+</svg>

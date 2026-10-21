@@ -43,7 +43,16 @@ Gate: `bun run test` · Commit: `feat: the paint MVP on web-base` (zusammen mit 
 
 Gate: Standard + `/dev/seiten` · Commit: `feat(pages): 18 new colouring pages in three age groups`
 
-## Phase 7 — Prüfung auf echten Geräten
+## Phase 7 — Überraschungsbilder und Sticker ✓
+
+- [x] Fortschritt als reines TS (`features/rewards/engine/`): Maltage, Flächenanteil, Sticker-Katalog, Tests
+- [x] Store `progress` (DB v3) mit Migrationstest; Nachholen aus den Op-Logs
+- [x] Bilderbuch: Geschenk-Kacheln, Glitzer für frisch Ausgepacktes; Stickerheft; Feier mit Konfetti und Melodie
+- [x] 21 Überraschungsbilder (7 Maltage × 3 Gruppen), alle ohne Lecks und über der Mindestgröße
+
+Gate: Standard + `/dev/seiten` + Durchlauf in Chromium (Malen → Auspacken → Sticker, nächster Tag, Neuladen, reduzierte Bewegung) · Commit: `feat: surprise pages unlocked by painting days, and stickers`
+
+## Phase 8 — Prüfung auf echten Geräten
 
 - [ ] Deploy einrichten (Cloudflare Workers Builds, Repo `daniel-rck/Malbuch`, Worker `malbuch`)
 - [ ] Auf dem Familien-Tablet installieren; Flugmodus: startet und malt
@@ -51,5 +60,6 @@ Gate: Standard + `/dev/seiten` · Commit: `feat(pages): 18 new colouring pages i
 - [ ] Budgets aus Spec §8 auf dem Tablet messen (Labeling, Maske, erstes Pixel, Undo bei 200 Ops)
 - [ ] „Bild speichern" auf iPad/Android: Teilen-Dialog, Speichern in Fotos
 - [ ] Mit Kindern ausprobieren: Gruppen-Icons verständlich? Bilder passend zum Alter?
+- [ ] Mit Kindern: Geschenke und Sticker verstanden? Melodie zu laut / nervig?
 
 Gate: Spec §9 vollständig abgehakt · Commit: `docs: acceptance on the family tablet`

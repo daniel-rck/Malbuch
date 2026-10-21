@@ -18,7 +18,31 @@ describe("PagePicker", () => {
       "true",
     );
     expect(screen.getByRole("button", { name: "Drache" })).toHaveAttribute("aria-pressed", "true");
-    expect(pageNames()).toEqual(PAGES.filter((p) => p.group === "mittel").map((p) => p.name));
+    expect(pageNames()).toEqual(
+      PAGES.filter((p) => p.group === "mittel").map((p) => (p.unlockDay ? "Überraschung" : p.name)),
+    );
+  });
+
+  it("wraps surprise pages until their painting day, and lets them wiggle only", async () => {
+    const onPick = vi.fn<(id: string) => void>();
+    renderWithPaint(<PagePicker thumbs={new Map()} onPick={onPick} />, "drache", {
+      days: ["2026-10-20", "2026-10-21"],
+    });
+    expect(screen.getByRole("button", { name: "Igel im Laub, neu" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Bagger, neu" })).toBeInTheDocument();
+    const presents = screen.getAllByRole("button", { name: "Überraschung" });
+    expect(presents).toHaveLength(5);
+    await userEvent.click(presents[0]!);
+    expect(onPick).not.toHaveBeenCalled();
+    expect(presents[0]).toHaveAttribute("aria-disabled", "true");
+  });
+
+  it("stops the sparkle once a surprise page was opened", () => {
+    renderWithPaint(<PagePicker thumbs={new Map()} onPick={() => {}} />, "drache", {
+      days: ["2026-10-21"],
+      seen: ["igel"],
+    });
+    expect(screen.getByRole("button", { name: "Igel im Laub" })).toBeInTheDocument();
   });
 
   it("shows another group's pages per tab and picks one", async () => {
