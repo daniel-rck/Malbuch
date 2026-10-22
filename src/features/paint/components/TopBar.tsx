@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useAppUpdate } from "../../../lib/pwa/useAppUpdate.ts";
-import { pageById, PAGES } from "../../../pages/manifest.ts";
+import { pageById, shownPages } from "../../../pages/manifest.ts";
 import { BOOK_BUTTON_ID, STICKER_BUTTON_ID } from "../../rewards/components/Celebration.tsx";
 import { unlockLevel, unseen } from "../../rewards/engine/unlock.ts";
 import { useRewards } from "../../rewards/state.ts";
@@ -24,7 +24,8 @@ export function TopBar({
   const { canUndo, canClear } = useCanvasState(session?.canvas ?? null);
   const { rewards, dispatchRewards } = useRewards();
   const { progress } = rewards;
-  const newPages = unseen(PAGES, unlockLevel(progress.days), progress.seen).length > 0;
+  const newPages =
+    unseen(shownPages(state.seasons), unlockLevel(progress.days), progress.seen).length > 0;
   const update = useAppUpdate();
   const [saving, setSaving] = useState(false);
   const page = pageById(state.pageId);

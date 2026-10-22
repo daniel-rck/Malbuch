@@ -1,5 +1,6 @@
+import { SEASONS } from "../features/rewards/engine/seasons.ts";
 import type { AgeGroup } from "./groups.ts";
-import type { PageMeta } from "./meta.ts";
+import { type PageMeta, svgPath } from "./meta.ts";
 
 // The page convention (spec §6) as checks on the SVG text. Used by
 // `bun run check:pages` and by the page test, so CI enforces it too.
@@ -81,7 +82,10 @@ export function checkSvg(svg: string, group: AgeGroup): string[] {
   return problems;
 }
 
-/** Problems between the page list and the SVG files present (paths like `./klein/fisch.svg`). */
+/**
+ * Problems between the page list and the SVG files present (paths like
+ * `./klein/fisch.svg`, `./saison/ostern/osterhase.svg`).
+ */
 export function checkManifest(
   meta: readonly PageMeta[],
   files: readonly string[],
@@ -97,7 +101,7 @@ export function checkManifest(
     if (!groups.some((g) => g.id === page.group)) {
       problems.push(`page ${page.id}: unknown group ${page.group}`);
     }
-    const path = `./${page.group}/${page.id}.svg`;
+    const path = svgPath(page);
     expected.add(path);
     if (!files.includes(path)) problems.push(`page ${page.id}: ${path} is missing`);
   }
@@ -117,6 +121,25 @@ export function checkManifest(
         const n = meta.filter((p) => p.group === group.id && p.unlockDay === day).length;
         if (n !== 1)
           problems.push(`group ${group.id} has ${n} pages for unlockDay ${day}, wants 1`);
+      }
+    }
+  }
+  // Season pages: one per group and season, never also a surprise.
+  for (const page of meta) {
+    if (page.season === undefined) continue;
+    if (!SEASONS.some((s) => s.id === page.season)) {
+      problems.push(`page ${page.id}: unknown season ${page.season}`);
+    }
+    if (page.unlockDay !== undefined) {
+      problems.push(`page ${page.id}: a season page has no unlockDay`);
+    }
+  }
+  if (meta.some((p) => p.season !== undefined)) {
+    for (const group of groups) {
+      for (const season of SEASONS) {
+        const n = meta.filter((p) => p.group === group.id && p.season === season.id).length;
+        if (n !== 1)
+          problems.push(`group ${group.id} has ${n} pages for season ${season.id}, wants 1`);
       }
     }
   }

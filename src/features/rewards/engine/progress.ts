@@ -28,12 +28,14 @@ export type Progress = {
   earned: Record<string, string>;
   /** Earned stickers not yet looked at in the sticker book. */
   fresh: string[];
-  /** Surprise pages already opened once. */
+  /** Surprise and season pages already opened once. */
   seen: string[];
+  /** Seasons already announced, as `seasonKey`s like `2026-halloween`. */
+  seasons: string[];
 };
 
 export function emptyProgress(): Progress {
-  return { days: [], pages: {}, earned: {}, fresh: [], seen: [] };
+  return { days: [], pages: {}, earned: {}, fresh: [], seen: [], seasons: [] };
 }
 
 const pad = (n: number) => String(n).padStart(2, "0");

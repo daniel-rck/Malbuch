@@ -1,7 +1,7 @@
 import { screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
-import { PAGES } from "../../../pages/manifest.ts";
+import { loadSeasons, PAGES } from "../../../pages/manifest.ts";
 import { PagePicker } from "./PagePicker.tsx";
 import { renderWithPaint } from "./test/render.tsx";
 
@@ -35,6 +35,21 @@ describe("PagePicker", () => {
     await userEvent.click(presents[0]!);
     expect(onPick).not.toHaveBeenCalled();
     expect(presents[0]).toHaveAttribute("aria-disabled", "true");
+  });
+
+  it("shows the pages of the seasons on first, and no others", async () => {
+    await loadSeasons(["halloween"]);
+    const { unmount } = renderWithPaint(
+      <PagePicker thumbs={new Map()} onPick={() => {}} />,
+      "drache",
+      {},
+      ["halloween"],
+    );
+    expect(pageNames()[0]).toBe("Gespenst und Kürbisse, neu");
+    unmount();
+    renderWithPaint(<PagePicker thumbs={new Map()} onPick={() => {}} />, "drache");
+    expect(pageNames()).not.toContain("Gespenst und Kürbisse, neu");
+    expect(pageNames()).not.toContain("Gespenst und Kürbisse");
   });
 
   it("stops the sparkle once a surprise page was opened", () => {

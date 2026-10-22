@@ -39,6 +39,7 @@ Eltern nur für „Bild speichern".
 | Neue Version | Nur wenn eine wartet: Icon „Neu laden" oben (kein Text-Toast) |
 | Überraschungsbilder | Jeder Maltag packt neue Bilder aus (§3.2); noch verpackte sind Geschenke im Bilderbuch |
 | Stickerheft | Stern-Knopf neben dem Bilderbuch; gewonnene Sticker mit Konfetti und kurzer Melodie (§3.3) |
+| Saisonbilder | Ostern, Sommer, Halloween, Weihnachten: je Gruppe ein Bild, nur während der Saison im Bilderbuch (§3.4) |
 | PWA | Installierbar, vollständig offline, Fullscreen, kein Pinch-Zoom/Scroll-Bounce |
 
 ### 3.1 Altersgruppen
@@ -75,7 +76,7 @@ Text; Stufen einer Serie zeigen goldene Sterne:
 
 | Reihe | Sticker |
 |---|---|
-| Bilder | 1 / 5 / 10 / 25 Bilder fertig · ein Bild ganz ausgemalt · alle Bilder einer Altersgruppe (×3) |
+| Bilder | 1 / 5 / 10 / 25 Bilder fertig · ein Bild ganz ausgemalt · alle Bilder einer Altersgruppe (×3, ohne Saisonbilder) |
 | Stifte und Farben | Stift, Farbeimer und Radierer ausprobiert · ein Bild nur mit dem Stift · 8 Farben in einem Bild · alle 16 Farben |
 | Maltage | 3 / 7 / 14 Maltage · an jedem Wochentag · Samstag und Sonntag |
 | Entdecken | alle drei Altersgruppen · ein Überraschungsbild gemalt · alle Überraschungen ausgepackt · aus jeder Überraschung eins |
@@ -92,10 +93,35 @@ Text; Stufen einer Serie zeigen goldene Sterne:
   keine Eingaben — weitermalen geht. Mit `prefers-reduced-motion`: kein Konfetti, kein Flug.
   Der Ton lässt sich nicht abschalten, solange es keinen Elternbereich gibt.
 
+### 3.4 Saisonbilder
+
+12 Bilder gehören zu einer Jahreszeit: je Altersgruppe eins pro Saison (`season` in
+`src/pages/meta.ts`, Engine `src/features/rewards/engine/seasons.ts`). Sie stehen **nur
+während ihrer Saison** im Bilderbuch, vorn in ihrer Gruppe, mit dem Saison-Abzeichen (Ei,
+Sonne, Kürbis, Tannenbaum) unten links. Danach sind sie weg; Gemaltes bleibt gespeichert und ist
+in der nächsten Saison wieder da. Ein noch offenes Saisonbild nach der Saison: es bleibt offen,
+erst der nächste Start öffnet das erste Bild.
+
+| Saison | Zeitraum (lokal, inklusive) | 3–4 | 5–6 | 7–8 |
+|---|---|---|---|---|
+| Ostern | Ostersonntag − 14 Tage … + 7 Tage | Osterhase | Osterkorb | Eiersuche (Wimmelbild) |
+| Sommer | 21.6.–31.8. | Krabbe am Strand | Sandburg | Freibad |
+| Halloween | 15.10.–7.11. | Kürbis | Gespenst und Kürbisse | Kürbisfest-Comic |
+| Weihnachten | 1.12.–6.1. | Tannenbaum | Rentier mit Schlitten | Weihnachtsmarkt |
+
+- Geprüft wird beim Start und wenn die App wieder sichtbar wird (`visibilitychange`).
+- **Ankunft:** beim ersten Start in einer Saison die Auspack-Feier (§3.2) mit den Saisonbildern,
+  einmal pro Saison und Jahr (`progress.seasons`, Schlüssel `2026-halloween`; Weihnachten im
+  Januar gehört zum Vorjahr). Glitzer, bis das Bild einmal geöffnet war.
+- **Nachladen:** Saisonbilder sind eigene JS-Chunks (nicht-eager `import.meta.glob`), geladen
+  nur für die laufende Saison. Der Service Worker precacht alle Chunks → auch offline da.
+- Saisonbilder zählen als Bilder (Fertig-Sticker), aber nicht zu „alle Bilder einer
+  Altersgruppe" — die wären sonst erst nach einem Jahr zu schaffen.
+
 ### Später (nicht im MVP)
 
 Stempel · Glitzer- und Regenbogenstift · Zeitraffer-Replay des Malprozesses
-(fällt aus dem Op-Log fast gratis ab) · Seitenpakete nachladen · Elternbereich mit Galerie.
+(fällt aus dem Op-Log fast gratis ab) · Elternbereich mit Galerie.
 
 ## 4. Stack
 
@@ -132,16 +158,18 @@ src/
     components/      TopBar, Paper, Tray, PagePicker, PageThumb, icons
     PaintPage.tsx    state.ts  db.ts  load.ts  autosave.ts  share.ts  config.ts
   features/rewards/  Überraschungsbilder und Sticker (§3.2–3.3)
-    engine/          reines TS: unlock.ts, progress.ts (Fortschritt, Flächenanteil), stickers.ts
+    engine/          reines TS: unlock.ts, progress.ts (Fortschritt, Flächenanteil), stickers.ts,
+                     seasons.ts (Saison-Zeiträume, Ostern)
     components/      StickerBook, Celebration, StickerArt
     state.ts  db.ts  tracking.ts (folgt dem Op-Log der offenen Seite)  sound.ts
   features/dev/      /dev/seiten (nur Dev-Build)
   pages/             Ausmalbilder
-    meta.ts          Liste {id, name, group, unlockDay?}
+    meta.ts          Liste {id, name, group, unlockDay?, season?}
     groups.ts        Altersgruppen
-    manifest.ts      Seiten mit SVG-Text (?raw)
+    manifest.ts      Seiten mit SVG-Text (?raw); Saisonbilder nachgeladen (loadSeasons)
     check.ts         Seiten-Konvention als Prüfung
     klein/ mittel/ gross/  *.svg
+    saison/<saison>/       *.svg
   lib/               web-base (db/, ui/, pwa/, routing/, router.tsx, routes.ts)
 scripts/check-pages.ts
 ```
@@ -224,7 +252,7 @@ IndexedDB `malbuch` (`src/lib/db/db.ts`), Bilder als PNG-`ArrayBuffer`:
 | `thumbs` | `{ id, thumb, digest }`: Thumbnail fürs Bilderbuch (seit DB v2; das Bilderbuch lädt keine Vollbilder) | mit der Vorschau, in einer Transaktion |
 | `labels` | Labels RLE-kodiert + Boxen, Schlüssel `<seite>:<svg-hash>:v<schema>:s<scale>` | einmal pro Zeichnung |
 | `settings` | Werkzeug, Farbe, Größe, letzte Seite | 300 ms nach Änderung |
-| `progress` | eine Zeile: Maltage, je Seite bester Flächenanteil/Farben/Werkzeuge, Sticker (`earned`, `fresh`), geöffnete Überraschungen (seit DB v3) | 300 ms nach Änderung, bei `visibilitychange: hidden` |
+| `progress` | eine Zeile: Maltage, je Seite bester Flächenanteil/Farben/Werkzeuge, Sticker (`earned`, `fresh`), geöffnete Überraschungs- und Saisonbilder, angekündigte Saisons (seit DB v3; neue Felder werden beim Lesen mit Defaults ergänzt) | 300 ms nach Änderung, bei `visibilitychange: hidden` |
 
 - **Schneller Start:** der Snapshot wird nur gezeichnet, wenn sein `digest` dem der ersten
   `opCount` Ops entspricht (die Länge allein reicht nicht: Undo + neuer Strich = gleiche Länge);
@@ -260,6 +288,8 @@ Jedes Bild ist `src/pages/<gruppe>/<id>.svg`, eingetragen in `src/pages/meta.ts`
 - Nur eigene Figuren – keine bekannten Charaktere, Marken, Logos.
 - Überraschungsbilder tragen `unlockDay` (1–7) in `meta.ts`, je Gruppe genau eins pro Tag, und
   stehen hinter den übrigen Bildern ihrer Gruppe (§3.2).
+- Saisonbilder tragen `season` statt `unlockDay`, liegen unter `src/pages/saison/<saison>/<id>.svg`
+  (Strich und Flächen nach ihrer Gruppe), je Gruppe und Saison genau eins (§3.4).
 
 Je Altersgruppe:
 
@@ -283,7 +313,7 @@ Buchstaben-Innenräume und dünne Splitter (< 30 Dok-px², höchstens ~5 px brei
 Nachbarn decken sie) sein. Eine ausgelaufene Fläche zeigt sich als ein Farbton, der sich über
 mehrere Flächen zieht.
 
-**Bestand (42 Seiten):**
+**Bestand (42 Seiten + 12 Saisonbilder, §3.4):**
 
 | Gruppe | Seiten |
 |---|---|
@@ -356,7 +386,8 @@ Mit ✓ markiert: automatisiert in Chromium geprüft (Playwright, 2026-10-20).
 
 ## 10. Offene Fragen
 
-- Seitenpakete später nachladbar oder alles im Bundle? (Heute: alle 42 SVGs im JS-Bundle.)
+- Seitenpakete von einem Server nachladen? (Heute: 42 SVGs im JS-Bundle, die Saisonbilder als
+  eigene Chunks, alle mit der App precacht.)
 - Elternbereich: Ton aus, Fortschritt zurücksetzen, alle Überraschungen sofort öffnen?
 - Stempel als Extra für 7–8?
 
@@ -394,5 +425,9 @@ Mit ✓ markiert: automatisiert in Chromium geprüft (Playwright, 2026-10-20).
 - _2026-10-21_ — Feier mit WebAudio-Melodie statt Audiodatei (nichts zu precachen); der Ton ist
   bis zu einem Elternbereich immer an. Fortschritt als eine Zeile im Store `progress` (DB v3),
   beim Upgrade aus den Op-Logs nachgeholt.
+- _2026-10-22_ — Saisonbilder (Ostern, Sommer, Halloween, Weihnachten), je Gruppe eins, **nur in
+  der Saison** sichtbar (Wunsch): danach verschwinden sie, Gemaltes bleibt und kommt mit der
+  Saison wieder. Eigene Chunks statt Bundle — das ist das „Nachladen"; ein Seitenpaket vom Server
+  bräuchte Laufzeit-Caching und bleibt offen (§10).
 - _2026-10-20_ — Spec bleibt Deutsch (web-base empfiehlt Englisch für `docs/specs/`; in
   web-base 08 als Abweichung vermerkt).

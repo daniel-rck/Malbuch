@@ -33,6 +33,8 @@ export type RewardsAction =
       today: string;
     }
   | { type: "seen"; pageId: string }
+  /** A season is on: announced with its pages, once per season and year. */
+  | { type: "season"; key: string; pages: string[] }
   | { type: "book"; open: boolean }
   | { type: "celebrated" };
 
@@ -60,6 +62,19 @@ export function rewardsReducer(state: RewardsState, action: RewardsAction): Rewa
     case "seen": {
       const progress = markSeen(state.progress, action.pageId);
       return progress === state.progress ? state : { ...state, progress };
+    }
+    case "season": {
+      const { progress } = state;
+      if (progress.seasons.includes(action.key)) return state;
+      const queue: Celebration[] = [...state.queue];
+      let n = state.next;
+      if (action.pages.length > 0) queue.push({ n: n++, kind: "unlock", pages: action.pages });
+      return {
+        ...state,
+        progress: { ...progress, seasons: [...progress.seasons, action.key] },
+        queue,
+        next: n,
+      };
     }
     case "book":
       // Closing the book means the new stickers have been looked at.

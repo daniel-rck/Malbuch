@@ -2,6 +2,7 @@ import { createContext, useContext } from "react";
 import { ageGroup, type GroupId } from "../../pages/groups.ts";
 import { pageById, PAGES } from "../../pages/manifest.ts";
 import { FIRST_PAGE } from "../../pages/meta.ts";
+import type { SeasonId } from "../rewards/engine/seasons.ts";
 import { PALETTE, type PenSize, SIZES, type Tool } from "./config.ts";
 
 // The UI state (spec §4: useReducer + Context, no framework). The op log is
@@ -13,6 +14,8 @@ export type PaintState = {
   size: PenSize;
   pageId: string;
   pickerOpen: boolean;
+  /** Seasons on today, their pages loaded (spec §3.4). */
+  seasons: readonly SeasonId[];
 };
 
 export type PaintAction =
@@ -21,6 +24,7 @@ export type PaintAction =
   | { type: "size"; size: PenSize }
   | { type: "page"; pageId: string }
   | { type: "picker"; open: boolean }
+  | { type: "seasons"; seasons: readonly SeasonId[] }
   | { type: "restore"; tool: Tool; color: string; size: number; pageId: string };
 
 export function groupOf(pageId: string): GroupId {
@@ -45,7 +49,14 @@ function fitToGroup(state: PaintState): PaintState {
 
 export function initialState(): PaintState {
   const pageId = pageById(FIRST_PAGE) ? FIRST_PAGE : (PAGES[0]?.id ?? FIRST_PAGE);
-  return fitToGroup({ tool: "pen", color: PALETTE[0].color, size: 30, pageId, pickerOpen: false });
+  return fitToGroup({
+    tool: "pen",
+    color: PALETTE[0].color,
+    size: 30,
+    pageId,
+    pickerOpen: false,
+    seasons: [],
+  });
 }
 
 export function paintReducer(state: PaintState, action: PaintAction): PaintState {
@@ -61,6 +72,10 @@ export function paintReducer(state: PaintState, action: PaintAction): PaintState
       return fitToGroup({ ...state, pageId: action.pageId, pickerOpen: false });
     case "picker":
       return { ...state, pickerOpen: action.open };
+    case "seasons":
+      return action.seasons.join() === state.seasons.join()
+        ? state
+        : { ...state, seasons: action.seasons };
     case "restore": {
       const size = SIZES.find((s) => s.size === action.size)?.size ?? state.size;
       const pageId = pageById(action.pageId) ? action.pageId : state.pageId;

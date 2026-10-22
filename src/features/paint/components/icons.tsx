@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import type { GroupId } from "../../../pages/groups.ts";
+import type { SeasonId } from "../../rewards/engine/seasons.ts";
 
 // Line icons in the prototype's style: 24×24, round caps, currentColor. All
 // decorative — the button around each carries the German aria-label.
@@ -109,6 +110,40 @@ export const GiftIcon = () => (
     <path d="M12 6C10.5 2.5 6 2.5 7 5c.4 1 2.5 1 5 1zM12 6c1.5-3.5 6-3.5 5-1-.4 1-2.5 1-5 1z" />
   </Icon>
 );
+
+/** A season page's badge: egg, sun, pumpkin or Christmas tree. */
+export function SeasonIcon({ season }: { season: SeasonId }) {
+  switch (season) {
+    case "ostern":
+      return (
+        <Icon width={2.2}>
+          <path d="M12 3c3.6 0 6.5 5.6 6.5 10.2A6.5 6.5 0 015.5 13.2C5.5 8.6 8.4 3 12 3z" />
+          <path d="M6 12.5l2.5-1.5 2 1.5 2-1.5 2 1.5 2-1.5 1.5 1" />
+        </Icon>
+      );
+    case "sommer":
+      return (
+        <Icon width={2.2}>
+          <circle cx="12" cy="12" r="4" />
+          <path d="M12 2.5v2.5M12 19v2.5M2.5 12H5M19 12h2.5M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8" />
+        </Icon>
+      );
+    case "halloween":
+      return (
+        <Icon width={2.2}>
+          <path d="M12 7c-5 0-8.5 2.8-8.5 6.8S7 21 12 21s8.5-3.2 8.5-7.2S17 7 12 7z" />
+          <path d="M12 7c-1.6 2.8-1.6 11 0 14M12 7c1.6 2.8 1.6 11 0 14M12 7c0-2 .6-3.2 2-4" />
+        </Icon>
+      );
+    case "weihnachten":
+      return (
+        <Icon width={2.2}>
+          <path d="M12 2.5l4.5 6h-2.5l4.5 6h-3l3.5 4.5H5l3.5-4.5h-3l4.5-6H7.5z" />
+          <path d="M12 19v2.5" />
+        </Icon>
+      );
+  }
+}
 
 /** "Stickerheft": a star sticker with a peeled corner. */
 export const StickerIcon = () => (

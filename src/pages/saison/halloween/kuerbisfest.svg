@@ -1,0 +1,153 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1000" width="800" height="1000">
+  <!-- Kürbisfest-Comic -->
+  <g fill="#fff" stroke="#1E2238" stroke-width="6" stroke-linejoin="round" stroke-linecap="round">
+    <rect x="20" y="20" width="760" height="306" rx="24"/>
+    <rect x="470" y="44" width="110" height="84" rx="4"/>
+    <path fill="none" d="M525 44 L525 128"/>
+    <path fill="#1E2238" d="M553 86 Q546 78 538 81 Q541 85 537 89 Q544 87 548 91 Q550 89 553 90 Q556 89 558 91 Q562 87 569 89 Q565 85 568 81 Q560 78 553 86 Z"/>
+    <polygon points="380,148 384,124 400,124 402,148"/>
+    <ellipse cx="390" cy="186" rx="60" ry="44"/>
+    <path fill="none" d="M370 144.5 Q350 186 370 227.5 M410 144.5 Q430 186 410 227.5"/>
+    <polygon points="372,174 386,174 379,160" fill="#1E2238"/>
+    <polygon points="394,174 408,174 401,160" fill="#1E2238"/>
+    <path fill="#1E2238" d="M374 192 L406 192 L400 204 L394 198 L390 204 L386 198 L380 204 Z"/>
+    <polygon points="490,186 492,158 510,158 512,186"/>
+    <ellipse cx="500" cy="206" rx="40" ry="28"/>
+    <path fill="none" d="M511 166 Q524 152 536 162"/>
+    <rect x="250" y="224" width="300" height="20" rx="4"/>
+    <rect x="270" y="244" width="18" height="66"/>
+    <rect x="512" y="244" width="18" height="66"/>
+    <g transform="translate(170 308)">
+      <ellipse cx="-22" cy="-4" rx="15" ry="10"/>
+      <ellipse cx="22" cy="-4" rx="15" ry="10"/>
+      <polygon points="6,-106 14,-86 96,-112 88,-132"/>
+      <circle cx="94" cy="-122" r="12"/>
+      <path d="M-22 -112 L22 -112 L44 -14 L29 -22 L15 -14 L0 -22 L-15 -14 L-29 -22 L-44 -14 Z"/>
+      <circle cx="0" cy="-140" r="30"/>
+      <circle cx="-10" cy="-140" r="3.5" fill="#1E2238" stroke="none"/>
+      <circle cx="10" cy="-140" r="3.5" fill="#1E2238" stroke="none"/>
+      <path fill="none" d="M-9 -127 Q0 -120 9 -127"/>
+      <path d="M-28 -164 L4 -232 Q10 -238 14 -228 L28 -164 Z"/>
+      <ellipse cx="0" cy="-164" rx="48" ry="11"/>
+    </g>
+    <g transform="translate(650 316)">
+      <ellipse cx="-52" cy="-100" rx="14" ry="28" transform="rotate(50 -52 -100)"/>
+      <path d="M-48 -14 L-44 -150 Q-44 -200 0 -200 Q44 -200 44 -150 L48 -14 Q36 -2 24 -14 Q12 -2 0 -14 Q-12 -2 -24 -14 Q-36 -2 -48 -14 Z"/>
+      <ellipse cx="-14" cy="-150" rx="7" ry="11" fill="#1E2238"/>
+      <ellipse cx="14" cy="-150" rx="7" ry="11" fill="#1E2238"/>
+      <path fill="none" d="M-10 -120 Q0 -112 10 -120"/>
+    </g>
+    <path d="M263 40 L393 40 A33 33 0 0 1 393 106 L292 106 L238 136 L262 106 A33 33 0 0 1 263 40 Z"/>
+    <text x="328" y="85" text-anchor="middle" font-size="34" font-weight="700" font-family="Arial, Helvetica, sans-serif" fill="#1E2238" stroke="none">Fertig!</text>
+
+    <rect x="20" y="346" width="760" height="307" rx="24"/>
+    <path fill="none" d="M20 590 L780 590"/>
+    <path d="M110 366 A34 34 0 0 0 110 434 A50 50 0 0 1 110 366 Z"/>
+    <path fill="#1E2238" d="M210 371 L213 377 L219 380 L213 383 L210 389 L207 383 L201 380 L207 377 Z"/>
+    <path fill="#1E2238" d="M500 381 L503 387 L509 390 L503 393 L500 399 L497 393 L491 390 L497 387 Z"/>
+    <path fill="#1E2238" d="M300 451 L303 457 L309 460 L303 463 L300 469 L297 463 L291 460 L297 457 Z"/>
+    <rect x="546" y="410" width="198" height="180"/>
+    <polygon points="530,416 645,362 760,416"/>
+    <rect x="590" y="432" width="104" height="158"/>
+    <polygon points="694,432 718,424 718,598 694,590"/>
+    <circle cx="648" cy="458" r="13"/>
+    <path d="M622 574 L624 514 Q648 500 672 514 L674 574 Z"/>
+    <circle cx="648" cy="486" r="24"/>
+    <circle cx="640" cy="484" r="3.5" fill="#1E2238" stroke="none"/>
+    <circle cx="656" cy="484" r="3.5" fill="#1E2238" stroke="none"/>
+    <path fill="none" d="M640 496 Q648 502 656 496"/>
+    <circle cx="636" cy="538" r="12"/>
+    <circle cx="660" cy="536" r="12"/>
+    <path d="M614 550 L682 550 Q682 578 648 578 Q614 578 614 550 Z"/>
+    <rect x="588" y="590" width="114" height="16" rx="3"/>
+    <polygon points="491,586 493,560 509,560 511,586"/>
+    <ellipse cx="500" cy="602" rx="30" ry="22"/>
+    <polygon points="487,598 497,598 492,588" fill="#1E2238"/>
+    <polygon points="503,598 513,598 508,588" fill="#1E2238"/>
+    <path fill="none" d="M488 608 Q500 616 512 608"/>
+    <g transform="translate(170 630)">
+      <ellipse cx="-22" cy="-4" rx="15" ry="10"/>
+      <ellipse cx="22" cy="-4" rx="15" ry="10"/>
+      <path fill="none" d="M-28 -40 Q-68 -40 -62 -80 Q-60 -92 -50 -90"/>
+      <rect x="-30" y="-112" width="60" height="94" rx="22"/>
+      <polygon points="-32,-146 -34,-198 -2,-168"/>
+      <polygon points="32,-146 34,-198 2,-168"/>
+      <circle cx="0" cy="-140" r="31"/>
+      <circle cx="-11" cy="-144" r="3.5" fill="#1E2238" stroke="none"/>
+      <circle cx="11" cy="-144" r="3.5" fill="#1E2238" stroke="none"/>
+      <polygon points="-5,-132 5,-132 0,-126" fill="#1E2238"/>
+      <path fill="none" d="M-10 -126 L-42 -130 M10 -126 L42 -130"/>
+    </g>
+    <ellipse cx="238" cy="590" rx="32" ry="24"/>
+    <polygon points="224,588 233,588 228.5,579" fill="#1E2238"/>
+    <polygon points="243,588 252,588 247.5,579" fill="#1E2238"/>
+    <path fill="none" d="M226 598 Q238 606 250 598"/>
+    <circle cx="206" cy="574" r="13"/>
+    <g transform="translate(390 632)">
+      <path d="M-46 -14 L-42 -136 Q-42 -180 0 -180 Q42 -180 42 -136 L46 -14 Q35 -2 23 -14 Q12 -2 0 -14 Q-12 -2 -23 -14 Q-35 -2 -46 -14 Z"/>
+      <ellipse cx="-14" cy="-136" rx="7" ry="11" fill="#1E2238"/>
+      <ellipse cx="14" cy="-136" rx="7" ry="11" fill="#1E2238"/>
+      <ellipse cx="0" cy="-110" rx="6" ry="7" fill="#1E2238"/>
+    </g>
+    <path fill="none" d="M406 568 Q424 524 442 568"/>
+    <rect x="400" y="566" width="48" height="40" rx="6"/>
+    <path d="M303 362 L433 362 A33 33 0 0 1 433 428 L336 428 L238 458 L292 428 L303 428 A33 33 0 0 1 303 362 Z"/>
+    <text x="368" y="407" text-anchor="middle" font-size="34" font-weight="700" font-family="Arial, Helvetica, sans-serif" fill="#1E2238" stroke="none">Süßes!</text>
+
+    <rect x="20" y="673" width="760" height="307" rx="24"/>
+    <path fill="none" d="M20 900 L780 900"/>
+    <circle cx="500" cy="735" r="34"/>
+    <path fill="#1E2238" d="M630 720 Q620 708 608 712 Q612 718 606 724 Q616 722 622 728 Q626 724 630 726 Q634 724 638 728 Q644 722 654 724 Q648 718 652 712 Q640 708 630 720 Z"/>
+    <path fill="#1E2238" d="M730 750 Q720 738 708 742 Q712 748 706 754 Q716 752 722 758 Q726 754 730 756 Q734 754 738 758 Q744 752 754 754 Q748 748 752 742 Q740 738 730 750 Z"/>
+    <path fill="#1E2238" d="M290 701 L293 707 L299 710 L293 713 L290 719 L287 713 L281 710 L287 707 Z"/>
+    <path fill="#1E2238" d="M600 691 L603 697 L609 700 L603 703 L600 709 L597 703 L591 700 L597 697 Z"/>
+    <g transform="translate(380 900)">
+      <ellipse cx="-52" cy="-150" rx="14" ry="30" transform="rotate(-30 -52 -150)"/>
+      <ellipse cx="52" cy="-150" rx="14" ry="30" transform="rotate(30 52 -150)"/>
+      <path d="M-48 -14 L-44 -150 Q-44 -200 0 -200 Q44 -200 44 -150 L48 -14 Z"/>
+      <ellipse cx="-14" cy="-150" rx="7" ry="11" fill="#1E2238"/>
+      <ellipse cx="14" cy="-150" rx="7" ry="11" fill="#1E2238"/>
+      <ellipse cx="0" cy="-122" rx="9" ry="10" fill="#1E2238"/>
+    </g>
+    <path d="M270 905 A40 40 0 0 1 290 830 A52 52 0 0 1 380 800 A52 52 0 0 1 470 830 A40 40 0 0 1 490 905 Z"/>
+    <polygon points="100,894 102,866 120,866 122,894"/>
+    <ellipse cx="110" cy="925" rx="54" ry="36"/>
+    <polygon points="86,918 102,918 94,902" fill="#1E2238"/>
+    <polygon points="118,918 134,918 126,902" fill="#1E2238"/>
+    <path fill="#1E2238" d="M84 934 L136 934 L128 948 L120 941 L110 948 L100 941 L92 948 Z"/>
+    <polygon points="196,920 198,896 214,896 216,920"/>
+    <ellipse cx="205" cy="940" rx="36" ry="24"/>
+    <polygon points="192,938 202,938 197,928" fill="#1E2238"/>
+    <polygon points="208,938 218,938 213,928" fill="#1E2238"/>
+    <path fill="none" d="M193 948 Q205 956 217 948"/>
+    <g transform="translate(560 958)">
+      <ellipse cx="-22" cy="-4" rx="15" ry="10"/>
+      <ellipse cx="22" cy="-4" rx="15" ry="10"/>
+      <polygon points="-6,-104 -20,-90 -60,-150 -44,-162"/>
+      <polygon points="6,-104 20,-90 60,-150 44,-162"/>
+      <path d="M-22 -112 L22 -112 L44 -14 L29 -22 L15 -14 L0 -22 L-15 -14 L-29 -22 L-44 -14 Z"/>
+      <circle cx="0" cy="-140" r="30"/>
+      <circle cx="-10" cy="-140" r="3.5" fill="#1E2238" stroke="none"/>
+      <circle cx="10" cy="-140" r="3.5" fill="#1E2238" stroke="none"/>
+      <ellipse cx="0" cy="-124" rx="6" ry="5" fill="#1E2238"/>
+      <path d="M-28 -164 L4 -232 Q10 -238 14 -228 L28 -164 Z"/>
+      <ellipse cx="0" cy="-164" rx="48" ry="11"/>
+    </g>
+    <g transform="translate(690 958)">
+      <ellipse cx="-22" cy="-4" rx="15" ry="10"/>
+      <ellipse cx="22" cy="-4" rx="15" ry="10"/>
+      <polygon points="10,-102 26,-86 62,-136 44,-150"/>
+      <rect x="-30" y="-112" width="60" height="94" rx="22"/>
+      <polygon points="-32,-146 -34,-198 -2,-168"/>
+      <polygon points="32,-146 34,-198 2,-168"/>
+      <circle cx="0" cy="-140" r="31"/>
+      <circle cx="-11" cy="-144" r="3.5" fill="#1E2238" stroke="none"/>
+      <circle cx="11" cy="-144" r="3.5" fill="#1E2238" stroke="none"/>
+      <polygon points="-5,-132 5,-132 0,-126" fill="#1E2238"/>
+      <path fill="none" d="M-10 -126 L-42 -130 M10 -126 L42 -130"/>
+      <circle cx="54" cy="-146" r="13"/>
+    </g>
+    <path d="M93 700 L197 700 A33 33 0 0 1 197 766 L196 766 L258 806 L150 766 L93 766 A33 33 0 0 1 93 700 Z"/>
+    <text x="145" y="748" text-anchor="middle" font-size="38" font-weight="700" font-family="Arial, Helvetica, sans-serif" fill="#1E2238" stroke="none">Buh!</text>
+  </g>
+</svg>

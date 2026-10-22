@@ -27,14 +27,16 @@ const days = (p: Progress) => p.days.length;
 const surprisesPainted = (p: Progress, pages: Pages) =>
   pages.filter((m) => m.unlockDay !== undefined && touched(p.pages[m.id]));
 
+/** All pages of a group, season pages aside: those come only once a year. */
 function group(id: GroupId, label: string): Sticker {
+  const ofGroup = (pages: Pages) => pages.filter((m) => m.group === id && !m.season);
   return {
     id: `alle-${id}`,
     kind: "malen",
     label,
-    goal: (pages) => pages.filter((m) => m.group === id).length,
+    goal: (pages) => ofGroup(pages).length,
     count: (p, pages) =>
-      pages.filter((m) => m.group === id && (p.pages[m.id]?.best ?? 0) >= FINISHED).length,
+      ofGroup(pages).filter((m) => (p.pages[m.id]?.best ?? 0) >= FINISHED).length,
   };
 }
 

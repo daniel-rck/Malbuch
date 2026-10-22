@@ -1,11 +1,18 @@
 import { useCallback, useEffect, useReducer, useState } from "react";
-import { pageById } from "../../pages/manifest.ts";
+import { loadSeasons, type Page, pageById } from "../../pages/manifest.ts";
 import { Celebration } from "../rewards/components/Celebration.tsx";
 import { StickerBook } from "../rewards/components/StickerBook.tsx";
 import { loadProgress } from "../rewards/db.ts";
-import { isUnlocked, unlockLevel } from "../rewards/engine/unlock.ts";
+import { dayOf } from "../rewards/engine/progress.ts";
+import { activeSeasons, type SeasonId, seasonKey } from "../rewards/engine/seasons.ts";
+import { isAvailable, unlockLevel } from "../rewards/engine/unlock.ts";
 import { primeSound } from "../rewards/sound.ts";
-import { initialRewards, RewardsContext, rewardsReducer } from "../rewards/state.ts";
+import {
+  initialRewards,
+  RewardsContext,
+  type RewardsAction,
+  rewardsReducer,
+} from "../rewards/state.ts";
 import { useSaveRewards, useTrackRewards } from "../rewards/tracking.ts";
 import { PagePicker } from "./components/PagePicker.tsx";
 import { Paper } from "./components/Paper.tsx";
@@ -14,7 +21,34 @@ import { TopBar } from "./components/TopBar.tsx";
 import { Tray } from "./components/Tray.tsx";
 import { loadSettings, saveSettings } from "./db.ts";
 import type { Session } from "./session.ts";
-import { initialState, PaintContext, paintReducer } from "./state.ts";
+import { initialState, PaintContext, type PaintAction, paintReducer } from "./state.ts";
+
+type Seasons = { today: string; seasons: SeasonId[]; pages: Page[] };
+
+/** The seasons on today, their pages loaded (spec §3.4). A failed load shows none. */
+async function seasonsToday(): Promise<Seasons> {
+  const today = dayOf(new Date());
+  const seasons = activeSeasons(today);
+  try {
+    return { today, seasons, pages: await loadSeasons(seasons) };
+  } catch (error) {
+    console.warn("Malbuch: could not load the season pages", error);
+    return { today, seasons: [], pages: [] };
+  }
+}
+
+/** Put the seasons in the picture book, and announce each once per season and year. */
+function applySeasons(
+  { today, seasons, pages }: Seasons,
+  dispatch: (action: PaintAction) => void,
+  dispatchRewards: (action: RewardsAction) => void,
+): void {
+  dispatch({ type: "seasons", seasons });
+  for (const season of seasons) {
+    const ids = pages.filter((p) => p.season === season).map((p) => p.id);
+    dispatchRewards({ type: "season", key: seasonKey(today, season), pages: ids });
+  }
+}
 
 /**
  * Android Back (and its edge swipe) closes a fullscreen book instead of
@@ -48,22 +82,36 @@ export function PaintPage() {
   // Settings and progress: restore once, then save after each change (spec §5.5).
   useEffect(() => {
     let cancelled = false;
-    void Promise.all([loadSettings(), loadProgress()]).then(([settings, progress]) => {
-      if (cancelled) return;
-      dispatchRewards({ type: "loaded", progress });
-      if (settings) {
-        // A surprise page only reopens while it is open (it always is, unless
-        // the progress was lost): else the first page it is.
-        const page = pageById(settings.pageId);
-        const open = page && isUnlocked(page, unlockLevel(progress.days));
-        dispatch({ type: "restore", ...settings, pageId: open ? settings.pageId : "" });
-      }
-      setRestored(true);
-    });
+    void Promise.all([loadSettings(), loadProgress(), seasonsToday()]).then(
+      ([settings, progress, seasons]) => {
+        if (cancelled) return;
+        dispatchRewards({ type: "loaded", progress });
+        applySeasons(seasons, dispatch, dispatchRewards);
+        if (settings) {
+          // A surprise page only reopens while it is open (it always is, unless
+          // the progress was lost), a season page only in its season: else the
+          // first page it is.
+          const page = pageById(settings.pageId);
+          const open = page && isAvailable(page, unlockLevel(progress.days), seasons.seasons);
+          dispatch({ type: "restore", ...settings, pageId: open ? settings.pageId : "" });
+        }
+        setRestored(true);
+      },
+    );
     return () => {
       cancelled = true;
     };
   }, []);
+  // A season may begin or end while the app sleeps in the background.
+  useEffect(() => {
+    if (!restored) return;
+    const onShow = () => {
+      if (document.visibilityState !== "visible") return;
+      void seasonsToday().then((seasons) => applySeasons(seasons, dispatch, dispatchRewards));
+    };
+    document.addEventListener("visibilitychange", onShow);
+    return () => document.removeEventListener("visibilitychange", onShow);
+  }, [restored]);
   useEffect(() => {
     if (!restored) return;
     const timer = setTimeout(() => {
@@ -103,7 +151,7 @@ export function PaintPage() {
 
   const pickPage = (pageId: string) => {
     const page = pageById(pageId);
-    if (session?.canvas.isDrawing || !page || !isUnlocked(page, level)) return;
+    if (session?.canvas.isDrawing || !page || !isAvailable(page, level, state.seasons)) return;
     dispatch({ type: "page", pageId });
   };
 

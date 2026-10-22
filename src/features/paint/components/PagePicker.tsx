@@ -1,17 +1,18 @@
 import { useEffect, useRef, useState } from "react";
 import { AGE_GROUPS, type GroupId } from "../../../pages/groups.ts";
-import { type Page, PAGES, pagesOf } from "../../../pages/manifest.ts";
+import { type Page, pagesOf, shownPages } from "../../../pages/manifest.ts";
 import { isUnlocked, unlockLevel, unseen } from "../../rewards/engine/unlock.ts";
 import { useRewards } from "../../rewards/state.ts";
 import { groupOf, usePaint } from "../state.ts";
-import { AgeIcon, CloseIcon, GiftIcon, Sparkle } from "./icons.tsx";
+import { AgeIcon, CloseIcon, GiftIcon, SeasonIcon, Sparkle } from "./icons.tsx";
 import { PageThumb } from "./PageThumb.tsx";
 
 /**
  * The picture book (docs/specs/malbuch.md §3): fullscreen, one tab per age
  * group, every page of the group as a big thumbnail with what's painted so far.
  * Surprise pages not open yet are wrapped presents (§3.2), newly opened ones
- * sparkle until they are first opened.
+ * sparkle until they are first opened. The pages of the seasons on come
+ * first, with the season's badge (§3.4).
  */
 export function PagePicker({
   thumbs,
@@ -23,7 +24,7 @@ export function PagePicker({
   const { state, dispatch } = usePaint();
   const { progress } = useRewards().rewards;
   const level = unlockLevel(progress.days);
-  const fresh = new Set(unseen(PAGES, level, progress.seen).map((p) => p.id));
+  const fresh = new Set(unseen(shownPages(state.seasons), level, progress.seen).map((p) => p.id));
   const [group, setGroup] = useState<GroupId>(() => groupOf(state.pageId));
   const closeRef = useRef<HTMLButtonElement>(null);
   const close = () => dispatch({ type: "picker", open: false });
@@ -62,7 +63,7 @@ export function PagePicker({
               className="relative grid size-[56px] cursor-pointer place-items-center rounded-2xl bg-tray text-on-tray shadow-[0_4px_0_var(--color-shade)] transition-transform aria-selected:-translate-y-0.5 aria-selected:-rotate-3 aria-selected:bg-sun aria-selected:text-tray"
             >
               <AgeIcon group={g.id} />
-              {pagesOf(g.id).some((p) => fresh.has(p.id)) && (
+              {pagesOf(g.id, state.seasons).some((p) => fresh.has(p.id)) && (
                 <Sparkle className="absolute -top-2 -right-2 size-5 animate-twinkle" />
               )}
             </button>
@@ -85,7 +86,7 @@ export function PagePicker({
         className="min-h-0 flex-1 touch-pan-y overflow-y-auto overscroll-contain px-4 pt-3 pb-6"
       >
         <div className="mx-auto grid max-w-5xl grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-5 sm:grid-cols-[repeat(auto-fill,minmax(180px,1fr))]">
-          {pagesOf(group).map((page, i) =>
+          {pagesOf(group, state.seasons).map((page, i) =>
             isUnlocked(page, level) ? (
               <button
                 key={page.id}
@@ -98,6 +99,11 @@ export function PagePicker({
                 <span className="block overflow-hidden rounded-xl">
                   <PageThumb page={page} thumb={thumbs.get(page.id)} />
                 </span>
+                {page.season && (
+                  <span className="absolute -bottom-3 -left-3 grid size-12 place-items-center rounded-full border-4 border-tray bg-sun text-tray">
+                    <SeasonIcon season={page.season} />
+                  </span>
+                )}
                 {fresh.has(page.id) && (
                   <Sparkle className="absolute -top-3 -right-3 size-10 animate-twinkle" />
                 )}
