@@ -80,3 +80,10 @@ Gate: Standard + `/dev/seiten` + Durchlauf in Chromium (Datum in und außerhalb 
 - [x] Sticker „Farbforscher" (1/5/15) und „Bild nur mit eigenen Farben"
 
 Gate: Standard + Durchlauf in Chromium (Tablet, Handy-Reihe mit Touch, Maus, Neuladen) · Commit: `feat: mix your own colours by dragging one blob onto another`
+
+## Phase 11 — Installieren-Knopf ✓
+
+- [x] Icon-Knopf in der Kopfleiste über web-bases `useInstallPrompt`, Halten; iOS: Safari-Schritte als Icons
+
+Gate: Standard + Chromium (Knopf erscheint mit `beforeinstallprompt`) · Commit: `feat: an install button for the app`
+

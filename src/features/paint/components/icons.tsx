@@ -145,6 +145,30 @@ export function SeasonIcon({ season }: { season: SeasonId }) {
   }
 }
 
+/** "App installieren": a tablet with an arrow coming down into it. */
+export const InstallIcon = () => (
+  <Icon width={2.3}>
+    <rect x="5" y="2.5" width="14" height="19" rx="2.5" />
+    <path d="M12 6.5v8M8.5 11l3.5 3.5 3.5-3.5M10 18.5h4" />
+  </Icon>
+);
+
+/** Safari's share button: a box with an arrow going up. */
+export const ShareIcon = () => (
+  <Icon width={2.3}>
+    <path d="M12 3v11M8 6.5L12 3l4 3.5" />
+    <path d="M8.5 10H6.5A1.5 1.5 0 005 11.5v8A1.5 1.5 0 006.5 21h11a1.5 1.5 0 001.5-1.5v-8a1.5 1.5 0 00-1.5-1.5h-2" />
+  </Icon>
+);
+
+/** Safari's "Zum Home-Bildschirm": a rounded square with a plus. */
+export const AddHomeIcon = () => (
+  <Icon width={2.3}>
+    <rect x="3.5" y="3.5" width="17" height="17" rx="4" />
+    <path d="M12 8v8M8 12h8" />
+  </Icon>
+);
+
 /** "Stickerheft": a star sticker with a peeled corner. */
 export const StickerIcon = () => (
   <Icon width={2.2}>

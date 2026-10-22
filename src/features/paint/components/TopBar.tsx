@@ -9,6 +9,7 @@ import type { Session } from "../session.ts";
 import { sharePicture } from "../share.ts";
 import { usePaint } from "../state.ts";
 import { ReloadIcon, SaveIcon, Sparkle, StickerIcon, TrashIcon, UndoIcon } from "./icons.tsx";
+import { InstallButton } from "./InstallButton.tsx";
 import { PageThumb } from "./PageThumb.tsx";
 import { RoundButton } from "./RoundButton.tsx";
 import { useCanvasState } from "./useCanvasState.ts";
@@ -92,6 +93,7 @@ export function TopBar({
               <ReloadIcon />
             </RoundButton>
           )}
+          <InstallButton />
           <RoundButton
             label="Rückgängig"
             disabled={!canUndo}

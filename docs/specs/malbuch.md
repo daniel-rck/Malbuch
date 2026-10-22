@@ -37,6 +37,7 @@ Eltern nur für „Bild speichern".
 | Autosave | Pro Seite in IndexedDB: Op-Log nach jeder Operation, Vorschau nach Pause/Wechsel (§5.5) |
 | Bild speichern | Gemaltes Bild + Linien als PNG (1200 × 1500); Web Share API, Fallback Download. Ebenfalls Gedrückthalten — das Teilen-Menü ist Sache der Eltern |
 | Neue Version | Nur wenn eine wartet: Icon „Neu laden" oben (kein Text-Toast) |
+| App installieren | Icon (Tablet mit Pfeil) vor Rückgängig, nur solange der Browser die Installation anbietet (`beforeinstallprompt`, über web-bases `useInstallPrompt`) oder auf iPhone/iPad; weg, sobald die App installiert läuft. Gedrückthalten wie Speichern. iOS kennt keinen Dialog: dort zeigt ein Fenster die zwei Safari-Schritte als Icons (Teilen → Zum Home-Bildschirm) |
 | Überraschungsbilder | Jeder Maltag packt neue Bilder aus (§3.2); noch verpackte sind Geschenke im Bilderbuch |
 | Stickerheft | Stern-Knopf neben dem Bilderbuch; gewonnene Sticker mit Konfetti und kurzer Melodie (§3.3) |
 | Saisonbilder | Ostern, Sommer, Halloween, Weihnachten: je Gruppe ein Bild, nur während der Saison im Bilderbuch (§3.4) |
@@ -368,8 +369,8 @@ Im Querformat ab 760 px Breite und auf jedem Handy im Querformat wandert die Abl
 den Platz: Knöpfe 48 px, engere Abstände, die Farben in **einer** Reihe, die seitlich scrollt
 (die gewählte bleibt im Blick, ein weicher Rand zeigt „da ist noch mehr"); im Querformat sitzt die
 Kopfleiste über der Ablage und das Papier nimmt die volle Höhe. Tablets bleiben unverändert.
-Kopfleiste: Bilderbuch und Stickerheft links, rechts Rückgängig und Speichern, mit Abstand der
-Papierkorb. Sticker sind gewellte Plaketten in der Farbe ihrer Reihe (Rosa, Türkis, Orange,
+Kopfleiste: Bilderbuch und Stickerheft links, rechts (Installieren,) Rückgängig und Speichern,
+mit Abstand der Papierkorb. Sticker sind gewellte Plaketten in der Farbe ihrer Reihe (Rosa, Türkis, Orange,
 Hellgrün); „neu" ist ein sonnengelber Glitzerstern.
 Kein Pinch-Zoom: `touch-action: none` auf `body` (iOS ignoriert `user-scalable=no`), nur
 Scrollflächen erlauben `pan-x`/`pan-y`.
@@ -455,5 +456,7 @@ Mit ✓ markiert: automatisiert in Chromium geprüft (Playwright, 2026-10-20).
   Gemischtes weiter. RYB-Farbkreis statt Kubelka-Munk: KM (ein Pigment-Parameter) machte Rot +
   Blau grau-türkis und Weiß kaum heller — Kinder erwarten Lila und Rosa. Halten statt sofort
   Ziehen, weil die Handy-Reihe seitlich scrollt.
+- _2026-10-22_ — Installieren-Knopf (Wunsch): eigenes Icon statt web-bases `InstallButton`, der
+  Text zeigt; der Hook `useInstallPrompt` wird genutzt. Halten, weil Installieren Elternsache ist.
 - _2026-10-20_ — Spec bleibt Deutsch (web-base empfiehlt Englisch für `docs/specs/`; in
   web-base 08 als Abweichung vermerkt).
