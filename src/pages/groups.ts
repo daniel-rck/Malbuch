@@ -12,6 +12,11 @@ export type AgeGroup = {
   label: string;
   /** Indexes into PALETTE. */
   colors: readonly number[];
+  /**
+   * Mixing colours in the tray (spec §3.5): not at all, palette colours only,
+   * or mixed colours again too.
+   */
+  mix: "none" | "palette" | "any";
   sizes: readonly PenSize[];
   defaultSize: PenSize;
   /** Allowed stroke-width range of the group's SVGs. */
@@ -30,6 +35,7 @@ export const AGE_GROUPS: readonly AgeGroup[] = [
     label: "3 bis 4 Jahre",
     // Red, orange, yellow, green, blue, purple, pink, both skin tones, brown.
     colors: [0, 1, 2, 4, 6, 8, 9, 10, 11, 12],
+    mix: "none",
     sizes: [30, 52],
     defaultSize: 52,
     stroke: [8, 8],
@@ -39,6 +45,7 @@ export const AGE_GROUPS: readonly AgeGroup[] = [
     id: "mittel",
     label: "5 bis 6 Jahre",
     colors: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
+    mix: "palette",
     sizes: [16, 30, 52],
     defaultSize: 30,
     stroke: [7, 8],
@@ -48,6 +55,7 @@ export const AGE_GROUPS: readonly AgeGroup[] = [
     id: "gross",
     label: "7 bis 8 Jahre",
     colors: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
+    mix: "any",
     sizes: [8, 16, 30, 52],
     defaultSize: 16,
     stroke: [6, 8],

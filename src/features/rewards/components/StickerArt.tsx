@@ -151,6 +151,15 @@ const Figure = ({ x, s, color }: { x: number; s: number; color: string }) => (
   </g>
 );
 
+/** Two blobs of paint running together into a green drop: a colour mixed. */
+const Mix = ({ y = 0 }: { y?: number }) => (
+  <g stroke={LINE} strokeWidth="3" strokeLinejoin="round" transform={`translate(0 ${y})`}>
+    <path d="M24 38c0-9 7-15 15-14 9 1 13 8 11 16-2 9-9 12-15 11-7-1-11-6-11-13z" fill="#1E88E5" />
+    <path d="M50 40c-1-9 6-16 14-15 9 1 13 9 11 16-2 8-9 11-15 10-6-1-10-5-10-11z" fill="#FDD835" />
+    <path d="M50 46c5 7 9 11 9 16a9 9 0 0 1-18 0c0-5 4-9 9-16z" fill="#74CE4B" />
+  </g>
+);
+
 const RAINBOW = ["#E53935", "#FB8C00", "#FDD835", "#8BC34A", "#1E88E5", "#8E24AA"];
 
 const ART: Record<string, () => ReactNode> = {
@@ -240,6 +249,31 @@ const ART: Record<string, () => ReactNode> = {
         <circle key={String(c)} cx={x} cy={y} r="5.5" fill={String(c)} strokeWidth="2" />
       ))}
     </g>
+  ),
+  "farbforscher-1": () => (
+    <>
+      <Mix y={-2} />
+      <Stars n={1} />
+    </>
+  ),
+  "farbforscher-5": () => (
+    <>
+      <Mix y={-2} />
+      <Stars n={2} />
+    </>
+  ),
+  "farbforscher-15": () => (
+    <>
+      <Mix y={-2} />
+      <Stars n={3} />
+    </>
+  ),
+  "eigene-farben": () => (
+    <Frame>
+      <path d="M33 61c3-13 11-21 17-21s6 7 0 11 2 10 19 10z" fill="#74CE4B" />
+      <circle cx="61" cy="37" r="5" fill="#C78140" />
+      <circle cx="40" cy="36" r="4" fill="#A564B4" />
+    </Frame>
   ),
   "tage-3": () => (
     <>

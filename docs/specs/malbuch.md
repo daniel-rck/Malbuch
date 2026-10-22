@@ -37,8 +37,11 @@ Eltern nur für „Bild speichern".
 | Autosave | Pro Seite in IndexedDB: Op-Log nach jeder Operation, Vorschau nach Pause/Wechsel (§5.5) |
 | Bild speichern | Gemaltes Bild + Linien als PNG (1200 × 1500); Web Share API, Fallback Download. Ebenfalls Gedrückthalten — das Teilen-Menü ist Sache der Eltern |
 | Neue Version | Nur wenn eine wartet: Icon „Neu laden" oben (kein Text-Toast) |
+| App installieren | Icon (Tablet mit Pfeil) vor Rückgängig, nur solange der Browser die Installation anbietet (`beforeinstallprompt`, über web-bases `useInstallPrompt`) oder auf iPhone/iPad; weg, sobald die App installiert läuft. Gedrückthalten wie Speichern. iOS kennt keinen Dialog: dort zeigt ein Fenster die zwei Safari-Schritte als Icons (Teilen → Zum Home-Bildschirm) |
 | Überraschungsbilder | Jeder Maltag packt neue Bilder aus (§3.2); noch verpackte sind Geschenke im Bilderbuch |
 | Stickerheft | Stern-Knopf neben dem Bilderbuch; gewonnene Sticker mit Konfetti und kurzer Melodie (§3.3) |
+| Saisonbilder | Ostern, Sommer, Halloween, Weihnachten: je Gruppe ein Bild, nur während der Saison im Bilderbuch (§3.4) |
+| Farben mischen | Ab 5: einen Klecks gedrückt halten und auf einen anderen ziehen → neue Farbe in einem von 4 eigenen Fächern (§3.5) |
 | PWA | Installierbar, vollständig offline, Fullscreen, kein Pinch-Zoom/Scroll-Bounce |
 
 ### 3.1 Altersgruppen
@@ -48,11 +51,11 @@ Die Gruppe bestimmt, welche Bilder zusammen im Bilderbuch stehen, und was die Ab
 Profil. Passt die gewählte Farbe/Größe nicht zur Gruppe, gilt der Gruppen-Default.
 Quelle: `src/pages/groups.ts`.
 
-| Gruppe | Reiter-Icon | Farben | Größen | Default |
-|---|---|---|---|---|
-| `klein` · 3–4 Jahre | kleine Figur | 10 (Rot, Orange, Gelb, Grün, Blau, Lila, Rosa, beide Hauttöne, Braun) | 30 / 52 | 52 |
-| `mittel` · 5–6 Jahre | mittlere Figur | alle 16 | 16 / 30 / 52 | 30 |
-| `gross` · 7–8 Jahre | große Figur | alle 16 | 8 / 16 / 30 / 52 | 16 |
+| Gruppe | Reiter-Icon | Farben | Größen | Default | Mischen (§3.5) |
+|---|---|---|---|---|---|
+| `klein` · 3–4 Jahre | kleine Figur | 10 (Rot, Orange, Gelb, Grün, Blau, Lila, Rosa, beide Hauttöne, Braun) | 30 / 52 | 52 | — |
+| `mittel` · 5–6 Jahre | mittlere Figur | alle 16 | 16 / 30 / 52 | 30 | Grundfarben |
+| `gross` · 7–8 Jahre | große Figur | alle 16 | 8 / 16 / 30 / 52 | 16 | auch Gemischtes weiter |
 
 ### 3.2 Überraschungsbilder
 
@@ -70,13 +73,13 @@ Kalendertage, eine Woche Pause kostet also nichts. Der allererste Strich packt T
 
 ### 3.3 Sticker
 
-22 Sticker in vier Reihen (`src/features/rewards/engine/stickers.ts`), jeder ein Bild ohne
+26 Sticker in vier Reihen (`src/features/rewards/engine/stickers.ts`), jeder ein Bild ohne
 Text; Stufen einer Serie zeigen goldene Sterne:
 
 | Reihe | Sticker |
 |---|---|
-| Bilder | 1 / 5 / 10 / 25 Bilder fertig · ein Bild ganz ausgemalt · alle Bilder einer Altersgruppe (×3) |
-| Stifte und Farben | Stift, Farbeimer und Radierer ausprobiert · ein Bild nur mit dem Stift · 8 Farben in einem Bild · alle 16 Farben |
+| Bilder | 1 / 5 / 10 / 25 Bilder fertig · ein Bild ganz ausgemalt · alle Bilder einer Altersgruppe (×3, ohne Saisonbilder) |
+| Stifte und Farben | Stift, Farbeimer und Radierer ausprobiert · ein Bild nur mit dem Stift · 8 Farben in einem Bild (Gemischte zählen mit) · alle 16 Farben · 1 / 5 / 15 Farben gemischt · ein Bild nur mit eigenen Farben |
 | Maltage | 3 / 7 / 14 Maltage · an jedem Wochentag · Samstag und Sonntag |
 | Entdecken | alle drei Altersgruppen · ein Überraschungsbild gemalt · alle Überraschungen ausgepackt · aus jeder Überraschung eins |
 
@@ -92,10 +95,55 @@ Text; Stufen einer Serie zeigen goldene Sterne:
   keine Eingaben — weitermalen geht. Mit `prefers-reduced-motion`: kein Konfetti, kein Flug.
   Der Ton lässt sich nicht abschalten, solange es keinen Elternbereich gibt.
 
+### 3.4 Saisonbilder
+
+12 Bilder gehören zu einer Jahreszeit: je Altersgruppe eins pro Saison (`season` in
+`src/pages/meta.ts`, Engine `src/features/rewards/engine/seasons.ts`). Sie stehen **nur
+während ihrer Saison** im Bilderbuch, vorn in ihrer Gruppe, mit dem Saison-Abzeichen (Ei,
+Sonne, Kürbis, Tannenbaum) unten links. Danach sind sie weg; Gemaltes bleibt gespeichert und ist
+in der nächsten Saison wieder da. Ein noch offenes Saisonbild nach der Saison: es bleibt offen,
+erst der nächste Start öffnet das erste Bild.
+
+| Saison | Zeitraum (lokal, inklusive) | 3–4 | 5–6 | 7–8 |
+|---|---|---|---|---|
+| Ostern | Ostersonntag − 14 Tage … + 7 Tage | Osterhase | Osterkorb | Eiersuche (Wimmelbild) |
+| Sommer | 21.6.–31.8. | Krabbe am Strand | Sandburg | Freibad |
+| Halloween | 15.10.–7.11. | Kürbis | Gespenst und Kürbisse | Kürbisfest-Comic |
+| Weihnachten | 1.12.–6.1. | Tannenbaum | Rentier mit Schlitten | Weihnachtsmarkt |
+
+- Geprüft wird beim Start und wenn die App wieder sichtbar wird (`visibilitychange`).
+- **Ankunft:** beim ersten Start in einer Saison die Auspack-Feier (§3.2) mit den Saisonbildern,
+  einmal pro Saison und Jahr (`progress.seasons`, Schlüssel `2026-halloween`; Weihnachten im
+  Januar gehört zum Vorjahr). Glitzer, bis das Bild einmal geöffnet war.
+- **Nachladen:** Saisonbilder sind eigene JS-Chunks (nicht-eager `import.meta.glob`), geladen
+  nur für die laufende Saison. Der Service Worker precacht alle Chunks → auch offline da.
+- Saisonbilder zählen als Bilder (Fertig-Sticker), aber nicht zu „alle Bilder einer
+  Altersgruppe" — die wären sonst erst nach einem Jahr zu schaffen.
+
+### 3.5 Farben mischen
+
+Ab 5 Jahren liegen hinter den 16 Farben **4 eigene Fächer** (leer: gestrichelter Umriss).
+
+- **Geste:** einen Klecks **0,25 s gedrückt halten** — er hebt sich und folgt dem Finger —, dann
+  auf einen anderen Klecks ziehen und loslassen. Das Ziel bekommt den Sonnenring. Vor dem
+  Anheben bleibt Tippen = Farbe wählen und Wischen = die Handy-Reihe scrollen; danach hält ein
+  nicht-passiver `touchmove`-Listener die Reihe still. Eine Maus zieht ohne Warten.
+  Daneben loslassen: nichts passiert. Kein Tastatur-Weg (die 16 Farben bleiben ja wählbar).
+- **Ergebnis:** die Mischung springt ins vorderste Fach (neueste vorn, die älteste fällt bei der
+  fünften raus), ist sofort gewählt, ein kurzer Zwei-Ton-Klang. Schon da → nach vorn; gleich einer
+  Palettenfarbe → kein Fach. 5–6 mischt nur die 16 Farben, 7–8 auch die eigenen weiter.
+- **Wie gemischt wird** (`src/features/paint/engine/mix.ts`, reines TS): wie Farbe im
+  Malkasten, über den Rot-Gelb-Blau-Farbkreis (RGB → RYB, Mittel, RYB → RGB): Blau + Gelb =
+  Grün, Rot + Blau = Lila, + Weiß = heller. Die Mischung wird halb zur Helligkeit der beiden
+  Eltern angehoben (sonst wird Rot + Gelb braun).
+- Die Fächer wandern mit den Einstellungen (`settings.mixes`); 3–4 sehen sie nicht, eine
+  gemischte Farbe fällt dort auf den Gruppen-Default zurück. Ops speichern Farben ohnehin als
+  Hex → Undo, Replay und Export brauchen nichts Neues.
+
 ### Später (nicht im MVP)
 
 Stempel · Glitzer- und Regenbogenstift · Zeitraffer-Replay des Malprozesses
-(fällt aus dem Op-Log fast gratis ab) · Seitenpakete nachladen · Elternbereich mit Galerie.
+(fällt aus dem Op-Log fast gratis ab) · Elternbereich mit Galerie.
 
 ## 4. Stack
 
@@ -122,6 +170,7 @@ src/
       regions.ts     labelRegions(), regionAt()
       mask.ts        buildMask(): Fläche + Linien bis DILATE Schritte (BFS)
       ops.ts         Operation-Typen, Rundung, Digest
+      mix.ts         Farben mischen (RYB), Fächer
       replay-plan.ts planReplay(): Startzustand + abzuspielende Ops
       input.ts       Ein-Pointer-Regel
       rle.ts hash.ts stats.ts
@@ -132,16 +181,18 @@ src/
     components/      TopBar, Paper, Tray, PagePicker, PageThumb, icons
     PaintPage.tsx    state.ts  db.ts  load.ts  autosave.ts  share.ts  config.ts
   features/rewards/  Überraschungsbilder und Sticker (§3.2–3.3)
-    engine/          reines TS: unlock.ts, progress.ts (Fortschritt, Flächenanteil), stickers.ts
+    engine/          reines TS: unlock.ts, progress.ts (Fortschritt, Flächenanteil), stickers.ts,
+                     seasons.ts (Saison-Zeiträume, Ostern)
     components/      StickerBook, Celebration, StickerArt
     state.ts  db.ts  tracking.ts (folgt dem Op-Log der offenen Seite)  sound.ts
   features/dev/      /dev/seiten (nur Dev-Build)
   pages/             Ausmalbilder
-    meta.ts          Liste {id, name, group, unlockDay?}
+    meta.ts          Liste {id, name, group, unlockDay?, season?}
     groups.ts        Altersgruppen
-    manifest.ts      Seiten mit SVG-Text (?raw)
+    manifest.ts      Seiten mit SVG-Text (?raw); Saisonbilder nachgeladen (loadSeasons)
     check.ts         Seiten-Konvention als Prüfung
     klein/ mittel/ gross/  *.svg
+    saison/<saison>/       *.svg
   lib/               web-base (db/, ui/, pwa/, routing/, router.tsx, routes.ts)
 scripts/check-pages.ts
 ```
@@ -223,8 +274,8 @@ IndexedDB `malbuch` (`src/lib/db/db.ts`), Bilder als PNG-`ArrayBuffer`:
 | `previews` | `{ id, labelsKey, png, opCount, digest }`: Malschicht in voller Größe; als Snapshot nur gültig für dieselben Labels | nach 3 s Pause, bei Seitenwechsel, Bilderbuch und `visibilitychange: hidden`; beim Öffnen ohne passende Vorschau nach 3 s |
 | `thumbs` | `{ id, thumb, digest }`: Thumbnail fürs Bilderbuch (seit DB v2; das Bilderbuch lädt keine Vollbilder) | mit der Vorschau, in einer Transaktion |
 | `labels` | Labels RLE-kodiert + Boxen, Schlüssel `<seite>:<svg-hash>:v<schema>:s<scale>` | einmal pro Zeichnung |
-| `settings` | Werkzeug, Farbe, Größe, letzte Seite | 300 ms nach Änderung |
-| `progress` | eine Zeile: Maltage, je Seite bester Flächenanteil/Farben/Werkzeuge, Sticker (`earned`, `fresh`), geöffnete Überraschungen (seit DB v3) | 300 ms nach Änderung, bei `visibilitychange: hidden` |
+| `settings` | Werkzeug, Farbe, Größe, letzte Seite, gemischte Farben (`mixes`, fehlt in alten Zeilen) | 300 ms nach Änderung |
+| `progress` | eine Zeile: Maltage, je Seite bester Flächenanteil/Farben/Werkzeuge, Sticker (`earned`, `fresh`), geöffnete Überraschungs- und Saisonbilder, angekündigte Saisons, gemischte Farben (seit DB v3; neue Felder werden beim Lesen mit Defaults ergänzt) | 300 ms nach Änderung, bei `visibilitychange: hidden` |
 
 - **Schneller Start:** der Snapshot wird nur gezeichnet, wenn sein `digest` dem der ersten
   `opCount` Ops entspricht (die Länge allein reicht nicht: Undo + neuer Strich = gleiche Länge);
@@ -260,6 +311,8 @@ Jedes Bild ist `src/pages/<gruppe>/<id>.svg`, eingetragen in `src/pages/meta.ts`
 - Nur eigene Figuren – keine bekannten Charaktere, Marken, Logos.
 - Überraschungsbilder tragen `unlockDay` (1–7) in `meta.ts`, je Gruppe genau eins pro Tag, und
   stehen hinter den übrigen Bildern ihrer Gruppe (§3.2).
+- Saisonbilder tragen `season` statt `unlockDay`, liegen unter `src/pages/saison/<saison>/<id>.svg`
+  (Strich und Flächen nach ihrer Gruppe), je Gruppe und Saison genau eins (§3.4).
 
 Je Altersgruppe:
 
@@ -283,7 +336,7 @@ Buchstaben-Innenräume und dünne Splitter (< 30 Dok-px², höchstens ~5 px brei
 Nachbarn decken sie) sein. Eine ausgelaufene Fläche zeigt sich als ein Farbton, der sich über
 mehrere Flächen zieht.
 
-**Bestand (42 Seiten):**
+**Bestand (42 Seiten + 12 Saisonbilder, §3.4):**
 
 | Gruppe | Seiten |
 |---|---|
@@ -316,8 +369,8 @@ Im Querformat ab 760 px Breite und auf jedem Handy im Querformat wandert die Abl
 den Platz: Knöpfe 48 px, engere Abstände, die Farben in **einer** Reihe, die seitlich scrollt
 (die gewählte bleibt im Blick, ein weicher Rand zeigt „da ist noch mehr"); im Querformat sitzt die
 Kopfleiste über der Ablage und das Papier nimmt die volle Höhe. Tablets bleiben unverändert.
-Kopfleiste: Bilderbuch und Stickerheft links, rechts Rückgängig und Speichern, mit Abstand der
-Papierkorb. Sticker sind gewellte Plaketten in der Farbe ihrer Reihe (Rosa, Türkis, Orange,
+Kopfleiste: Bilderbuch und Stickerheft links, rechts (Installieren,) Rückgängig und Speichern,
+mit Abstand der Papierkorb. Sticker sind gewellte Plaketten in der Farbe ihrer Reihe (Rosa, Türkis, Orange,
 Hellgrün); „neu" ist ein sonnengelber Glitzerstern.
 Kein Pinch-Zoom: `touch-action: none` auf `body` (iOS ignoriert `user-scalable=no`), nur
 Scrollflächen erlauben `pan-x`/`pan-y`.
@@ -356,7 +409,8 @@ Mit ✓ markiert: automatisiert in Chromium geprüft (Playwright, 2026-10-20).
 
 ## 10. Offene Fragen
 
-- Seitenpakete später nachladbar oder alles im Bundle? (Heute: alle 42 SVGs im JS-Bundle.)
+- Seitenpakete von einem Server nachladen? (Heute: 42 SVGs im JS-Bundle, die Saisonbilder als
+  eigene Chunks, alle mit der App precacht.)
 - Elternbereich: Ton aus, Fortschritt zurücksetzen, alle Überraschungen sofort öffnen?
 - Stempel als Extra für 7–8?
 
@@ -394,5 +448,15 @@ Mit ✓ markiert: automatisiert in Chromium geprüft (Playwright, 2026-10-20).
 - _2026-10-21_ — Feier mit WebAudio-Melodie statt Audiodatei (nichts zu precachen); der Ton ist
   bis zu einem Elternbereich immer an. Fortschritt als eine Zeile im Store `progress` (DB v3),
   beim Upgrade aus den Op-Logs nachgeholt.
+- _2026-10-22_ — Saisonbilder (Ostern, Sommer, Halloween, Weihnachten), je Gruppe eins, **nur in
+  der Saison** sichtbar (Wunsch): danach verschwinden sie, Gemaltes bleibt und kommt mit der
+  Saison wieder. Eigene Chunks statt Bundle — das ist das „Nachladen"; ein Seitenpaket vom Server
+  bräuchte Laufzeit-Caching und bleibt offen (§10).
+- _2026-10-22_ — Farben mischen per Halten + Ziehen (Wunsch), 4 Fächer ab 5, 7–8 mischt auch
+  Gemischtes weiter. RYB-Farbkreis statt Kubelka-Munk: KM (ein Pigment-Parameter) machte Rot +
+  Blau grau-türkis und Weiß kaum heller — Kinder erwarten Lila und Rosa. Halten statt sofort
+  Ziehen, weil die Handy-Reihe seitlich scrollt.
+- _2026-10-22_ — Installieren-Knopf (Wunsch): eigenes Icon statt web-bases `InstallButton`, der
+  Text zeigt; der Hook `useInstallPrompt` wird genutzt. Halten, weil Installieren Elternsache ist.
 - _2026-10-20_ — Spec bleibt Deutsch (web-base empfiehlt Englisch für `docs/specs/`; in
   web-base 08 als Abweichung vermerkt).

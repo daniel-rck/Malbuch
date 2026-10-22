@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { isUnlocked, newlyUnlocked, unlockLevel, unseen } from "./unlock.ts";
+import { isAvailable, isUnlocked, newlyUnlocked, unlockLevel, unseen } from "./unlock.ts";
 
 const pages = [
   { id: "a" },
@@ -33,5 +33,21 @@ describe("surprise pages", () => {
   it("sparkle while open and never opened", () => {
     expect(unseen(pages, 2, ["b"]).map((p) => p.id)).toEqual(["c"]);
     expect(unseen(pages, 0, [])).toEqual([]);
+  });
+});
+
+describe("season pages", () => {
+  const pumpkin = { id: "k", season: "halloween" as const };
+
+  it("are there only while their season is on", () => {
+    expect(isAvailable(pumpkin, 0, ["halloween"])).toBe(true);
+    expect(isAvailable(pumpkin, 7, [])).toBe(false);
+    expect(isAvailable({ unlockDay: 2 }, 2, [])).toBe(true);
+    expect(isAvailable({ unlockDay: 2 }, 1, ["halloween"])).toBe(false);
+  });
+
+  it("sparkle until first opened", () => {
+    expect(unseen([pumpkin], 0, []).map((p) => p.id)).toEqual(["k"]);
+    expect(unseen([pumpkin], 0, ["k"])).toEqual([]);
   });
 });

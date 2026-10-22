@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Op } from "../paint/engine/ops.ts";
-import { initialRewards, type RewardsState, rewardsReducer } from "./state.ts";
+import { initialRewards, type RewardsAction, type RewardsState, rewardsReducer } from "./state.ts";
 
 const fill = (region: number): Op => ({ t: "fill", color: "#E53935", region });
 const page = { id: "fisch", group: "klein" as const };
@@ -46,5 +46,21 @@ describe("rewardsReducer", () => {
   it("remembers opened surprise pages", () => {
     const s = rewardsReducer(initialRewards(), { type: "seen", pageId: "katze" });
     expect(s.progress.seen).toEqual(["katze"]);
+  });
+
+  it("announces a season with its pages once", () => {
+    const action: RewardsAction = { type: "season", key: "2026-halloween", pages: ["kuerbis"] };
+    const s = rewardsReducer(initialRewards(), action);
+    expect(s.queue).toEqual([{ n: 1, kind: "unlock", pages: ["kuerbis"] }]);
+    expect(s.progress.seasons).toEqual(["2026-halloween"]);
+    expect(rewardsReducer(s, action)).toBe(s);
+  });
+
+  it("counts a mixed colour and celebrates the explorer sticker", () => {
+    const action: RewardsAction = { type: "mixed", color: "#74CE4B", today: "2026-10-22" };
+    const s = rewardsReducer(initialRewards(), action);
+    expect(s.progress.mixed).toEqual(["#74CE4B"]);
+    expect(s.queue).toEqual([{ n: 1, kind: "sticker", id: "farbforscher-1" }]);
+    expect(rewardsReducer(s, action)).toBe(s);
   });
 });

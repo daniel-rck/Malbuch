@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { ageGroup } from "../../pages/groups.ts";
-import { type Page, PAGES } from "../../pages/manifest.ts";
+import { loadAllSeasons, type Page, PAGES } from "../../pages/manifest.ts";
 import {
   DILATE,
   LINE_THRESHOLD,
@@ -48,9 +48,14 @@ type PageReport = {
 export function DevPagesPage() {
   const [params] = useSearchParams();
   const only = params.get("seite");
-  const pages = only ? PAGES.filter((p) => p.id === only) : PAGES;
+  // Season pages too, whatever the date.
+  const [loaded, setLoaded] = useState<readonly Page[] | null>(null);
+  useEffect(() => {
+    void loadAllSeasons().then((season) => setLoaded([...PAGES, ...season]));
+  }, []);
+  const pages = (loaded ?? []).filter((p) => !only || p.id === only);
   const [reports, setReports] = useState<Record<string, PageReport>>({});
-  const done = Object.keys(reports).length === pages.length;
+  const done = loaded !== null && Object.keys(reports).length === pages.length;
   const onReport = useCallback((r: PageReport) => setReports((all) => ({ ...all, [r.id]: r })), []);
 
   return (

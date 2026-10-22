@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import type { GroupId } from "../../../pages/groups.ts";
+import type { SeasonId } from "../../rewards/engine/seasons.ts";
 
 // Line icons in the prototype's style: 24×24, round caps, currentColor. All
 // decorative — the button around each carries the German aria-label.
@@ -107,6 +108,64 @@ export const GiftIcon = () => (
     <rect x="2.5" y="6" width="19" height="4" rx="1" />
     <path d="M12 6v14.5" />
     <path d="M12 6C10.5 2.5 6 2.5 7 5c.4 1 2.5 1 5 1zM12 6c1.5-3.5 6-3.5 5-1-.4 1-2.5 1-5 1z" />
+  </Icon>
+);
+
+/** A season page's badge: egg, sun, pumpkin or Christmas tree. */
+export function SeasonIcon({ season }: { season: SeasonId }) {
+  switch (season) {
+    case "ostern":
+      return (
+        <Icon width={2.2}>
+          <path d="M12 3c3.6 0 6.5 5.6 6.5 10.2A6.5 6.5 0 015.5 13.2C5.5 8.6 8.4 3 12 3z" />
+          <path d="M6 12.5l2.5-1.5 2 1.5 2-1.5 2 1.5 2-1.5 1.5 1" />
+        </Icon>
+      );
+    case "sommer":
+      return (
+        <Icon width={2.2}>
+          <circle cx="12" cy="12" r="4" />
+          <path d="M12 2.5v2.5M12 19v2.5M2.5 12H5M19 12h2.5M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8" />
+        </Icon>
+      );
+    case "halloween":
+      return (
+        <Icon width={2.2}>
+          <path d="M12 7c-5 0-8.5 2.8-8.5 6.8S7 21 12 21s8.5-3.2 8.5-7.2S17 7 12 7z" />
+          <path d="M12 7c-1.6 2.8-1.6 11 0 14M12 7c1.6 2.8 1.6 11 0 14M12 7c0-2 .6-3.2 2-4" />
+        </Icon>
+      );
+    case "weihnachten":
+      return (
+        <Icon width={2.2}>
+          <path d="M12 2.5l4.5 6h-2.5l4.5 6h-3l3.5 4.5H5l3.5-4.5h-3l4.5-6H7.5z" />
+          <path d="M12 19v2.5" />
+        </Icon>
+      );
+  }
+}
+
+/** "App installieren": a tablet with an arrow coming down into it. */
+export const InstallIcon = () => (
+  <Icon width={2.3}>
+    <rect x="5" y="2.5" width="14" height="19" rx="2.5" />
+    <path d="M12 6.5v8M8.5 11l3.5 3.5 3.5-3.5M10 18.5h4" />
+  </Icon>
+);
+
+/** Safari's share button: a box with an arrow going up. */
+export const ShareIcon = () => (
+  <Icon width={2.3}>
+    <path d="M12 3v11M8 6.5L12 3l4 3.5" />
+    <path d="M8.5 10H6.5A1.5 1.5 0 005 11.5v8A1.5 1.5 0 006.5 21h11a1.5 1.5 0 001.5-1.5v-8a1.5 1.5 0 00-1.5-1.5h-2" />
+  </Icon>
+);
+
+/** Safari's "Zum Home-Bildschirm": a rounded square with a plus. */
+export const AddHomeIcon = () => (
+  <Icon width={2.3}>
+    <rect x="3.5" y="3.5" width="17" height="17" rx="4" />
+    <path d="M12 8v8M8 12h8" />
   </Icon>
 );
 

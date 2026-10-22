@@ -1,6 +1,14 @@
 import { describe, expect, it } from "vitest";
 import type { Op } from "../../paint/engine/ops.ts";
-import { dayOf, emptyProgress, markSeen, pageProgress, record, weekdayOf } from "./progress.ts";
+import {
+  dayOf,
+  emptyProgress,
+  markSeen,
+  pageProgress,
+  record,
+  recordMix,
+  weekdayOf,
+} from "./progress.ts";
 
 const fill = (region: number, color = "#E53935"): Op => ({ t: "fill", color, region });
 const stroke = (region: number | null, color = "#1E88E5"): Op => ({
@@ -47,6 +55,7 @@ describe("record", () => {
       fill: true,
       erase: false,
       penOnly: false,
+      mixedOnly: false,
     });
     // Undo down to one op: the best stays.
     p = record(p, page, [fill(1)], 4, false, "2026-10-21");
@@ -75,6 +84,24 @@ describe("record", () => {
       record(emptyProgress(), page, [fill(1), stroke(2), stroke(3)], 4, true, "d").pages.fisch
         ?.penOnly,
     ).toBe(false);
+  });
+
+  it("notes a picture finished in mixed colours alone", () => {
+    const mixed = "#74CE4B";
+    const ops = [fill(1, "#E53935"), { t: "clear" } as const, fill(1, mixed), fill(2, mixed)];
+    const p = record(emptyProgress(), page, [...ops, stroke(3, mixed)], 4, true, "d");
+    expect(p.pages.fisch?.mixedOnly).toBe(true);
+    expect(
+      record(emptyProgress(), page, [...ops, stroke(3)], 4, true, "d").pages.fisch?.mixedOnly,
+    ).toBe(false);
+  });
+});
+
+describe("recordMix", () => {
+  it("counts each mixed colour once", () => {
+    const p = recordMix(emptyProgress(), "#74CE4B");
+    expect(p.mixed).toEqual(["#74CE4B"]);
+    expect(recordMix(p, "#74CE4B")).toBe(p);
   });
 });
 

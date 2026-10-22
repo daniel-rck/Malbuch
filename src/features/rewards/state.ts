@@ -2,7 +2,7 @@ import { createContext, useContext } from "react";
 import type { GroupId } from "../../pages/groups.ts";
 import { PAGE_META } from "../../pages/meta.ts";
 import type { Op } from "../paint/engine/ops.ts";
-import { emptyProgress, markSeen, type Progress, record } from "./engine/progress.ts";
+import { emptyProgress, markSeen, type Progress, record, recordMix } from "./engine/progress.ts";
 import { award } from "./engine/stickers.ts";
 import { newlyUnlocked, unlockLevel } from "./engine/unlock.ts";
 
@@ -33,6 +33,9 @@ export type RewardsAction =
       today: string;
     }
   | { type: "seen"; pageId: string }
+  | { type: "mixed"; color: string; today: string }
+  /** A season is on: announced with its pages, once per season and year. */
+  | { type: "season"; key: string; pages: string[] }
   | { type: "book"; open: boolean }
   | { type: "celebrated" };
 
@@ -57,9 +60,33 @@ export function rewardsReducer(state: RewardsState, action: RewardsAction): Rewa
       for (const s of won) queue.push({ n: n++, kind: "sticker", id: s.id });
       return { ...state, progress, queue, next: n };
     }
+    case "mixed": {
+      const after = recordMix(state.progress, action.color);
+      if (after === state.progress) return state;
+      const { progress, won } = award(after, PAGE_META, action.today);
+      let n = state.next;
+      const queue: Celebration[] = [
+        ...state.queue,
+        ...won.map((s) => ({ n: n++, kind: "sticker" as const, id: s.id })),
+      ];
+      return { ...state, progress, queue, next: n };
+    }
     case "seen": {
       const progress = markSeen(state.progress, action.pageId);
       return progress === state.progress ? state : { ...state, progress };
+    }
+    case "season": {
+      const { progress } = state;
+      if (progress.seasons.includes(action.key)) return state;
+      const queue: Celebration[] = [...state.queue];
+      let n = state.next;
+      if (action.pages.length > 0) queue.push({ n: n++, kind: "unlock", pages: action.pages });
+      return {
+        ...state,
+        progress: { ...progress, seasons: [...progress.seasons, action.key] },
+        queue,
+        next: n,
+      };
     }
     case "book":
       // Closing the book means the new stickers have been looked at.

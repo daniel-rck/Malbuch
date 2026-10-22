@@ -36,3 +36,5 @@ bunx github:daniel-rck/web-base#v0.6.0 check --strict
 - Neue Ausmalbilder: Konvention in Spec §6, `src/pages/meta.ts` ergänzen (Überraschungsbilder
   mit `unlockDay`, je Gruppe eins pro Tag 1–7),
   `bun run check:pages`, dann Flächen auf `/dev/seiten?seite=<id>` (Dev-Server) prüfen.
+  Saisonbilder (`season` statt `unlockDay`) liegen unter `src/pages/saison/<saison>/`, je Gruppe
+  und Saison genau eins (Spec §3.4).

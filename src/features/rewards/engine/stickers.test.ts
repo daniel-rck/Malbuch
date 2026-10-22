@@ -11,6 +11,7 @@ const pages: PageMeta[] = [
   { id: "d", name: "D", group: "gross" },
   { id: "s1", name: "S1", group: "klein", unlockDay: 1 },
   { id: "s2", name: "S2", group: "mittel", unlockDay: 2 },
+  { id: "k", name: "K", group: "klein", season: "halloween" },
 ];
 
 const stats = (over: Partial<PageStats> = {}): PageStats => ({
@@ -46,10 +47,12 @@ describe("the sticker catalogue", () => {
         a: stats({ best: 0.8 }),
         b: stats({ best: 1 }),
         c: stats({ group: "mittel", best: 0.5 }),
+        k: stats({ best: 1 }),
       },
     });
-    expect(count("bild-1", p)).toBe(2);
-    expect(count("ganz-bunt", p)).toBe(1);
+    expect(count("bild-1", p)).toBe(3);
+    expect(count("ganz-bunt", p)).toBe(2);
+    // Season pages count as pictures, not towards a whole group.
     expect(count("alle-klein", p)).toBe(2);
     expect(
       goalOf(
@@ -70,6 +73,21 @@ describe("the sticker catalogue", () => {
     expect(count("nur-stift", p)).toBe(1);
     expect(count("regenbogen", p)).toBe(8);
     expect(count("alle-farben", p)).toBe(9);
+  });
+
+  it("counts mixed colours and pictures painted in them alone", () => {
+    const p = progress({
+      mixed: ["#000001", "#000002", "#000003", "#000004", "#000005"],
+      pages: { a: stats({ mixedOnly: true, colors: ["#000001"] }) },
+    });
+    expect(count("farbforscher-1", p)).toBe(5);
+    expect(award(p, pages, "d").won.map((s) => s.id)).toEqual([
+      "farbforscher-1",
+      "farbforscher-5",
+      "eigene-farben",
+    ]);
+    // Mixed colours count for a colourful picture, not for all sixteen.
+    expect(count("alle-farben", p)).toBe(0);
   });
 
   it("counts days, weekdays and weekends", () => {

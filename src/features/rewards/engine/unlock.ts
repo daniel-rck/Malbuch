@@ -1,4 +1,5 @@
 import type { PageMeta } from "../../../pages/meta.ts";
+import type { SeasonId } from "./seasons.ts";
 
 // Surprise pages (spec §3.2): every day the child paints on opens the pages of
 // the next unlock day, one per age group, until all seven are open. Counting
@@ -15,6 +16,15 @@ export function isUnlocked(page: Pick<PageMeta, "unlockDay">, level: number): bo
   return page.unlockDay === undefined || page.unlockDay <= level;
 }
 
+/** Whether a page is in the picture book: open, and for a season page its season is on. */
+export function isAvailable(
+  page: Pick<PageMeta, "unlockDay" | "season">,
+  level: number,
+  seasons: readonly SeasonId[],
+): boolean {
+  return page.season === undefined ? isUnlocked(page, level) : seasons.includes(page.season);
+}
+
 /** The pages that open when the level goes from `from` to `to`. */
 export function newlyUnlocked<P extends Pick<PageMeta, "unlockDay">>(
   pages: readonly P[],
@@ -24,13 +34,20 @@ export function newlyUnlocked<P extends Pick<PageMeta, "unlockDay">>(
   return pages.filter((p) => p.unlockDay !== undefined && p.unlockDay > from && p.unlockDay <= to);
 }
 
-/** Surprise pages that are open but were never opened: they sparkle in the picture book. */
-export function unseen<P extends Pick<PageMeta, "id" | "unlockDay">>(
+/**
+ * Surprise and season pages that are open but were never opened: they sparkle
+ * in the picture book. `pages` are the pages shown (season pages of the
+ * seasons on).
+ */
+export function unseen<P extends Pick<PageMeta, "id" | "unlockDay" | "season">>(
   pages: readonly P[],
   level: number,
   seen: readonly string[],
 ): P[] {
   return pages.filter(
-    (p) => p.unlockDay !== undefined && isUnlocked(p, level) && !seen.includes(p.id),
+    (p) =>
+      (p.unlockDay !== undefined || p.season !== undefined) &&
+      isUnlocked(p, level) &&
+      !seen.includes(p.id),
   );
 }

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useAppUpdate } from "../../../lib/pwa/useAppUpdate.ts";
-import { pageById, PAGES } from "../../../pages/manifest.ts";
+import { pageById, shownPages } from "../../../pages/manifest.ts";
 import { BOOK_BUTTON_ID, STICKER_BUTTON_ID } from "../../rewards/components/Celebration.tsx";
 import { unlockLevel, unseen } from "../../rewards/engine/unlock.ts";
 import { useRewards } from "../../rewards/state.ts";
@@ -9,6 +9,7 @@ import type { Session } from "../session.ts";
 import { sharePicture } from "../share.ts";
 import { usePaint } from "../state.ts";
 import { ReloadIcon, SaveIcon, Sparkle, StickerIcon, TrashIcon, UndoIcon } from "./icons.tsx";
+import { InstallButton } from "./InstallButton.tsx";
 import { PageThumb } from "./PageThumb.tsx";
 import { RoundButton } from "./RoundButton.tsx";
 import { useCanvasState } from "./useCanvasState.ts";
@@ -24,7 +25,8 @@ export function TopBar({
   const { canUndo, canClear } = useCanvasState(session?.canvas ?? null);
   const { rewards, dispatchRewards } = useRewards();
   const { progress } = rewards;
-  const newPages = unseen(PAGES, unlockLevel(progress.days), progress.seen).length > 0;
+  const newPages =
+    unseen(shownPages(state.seasons), unlockLevel(progress.days), progress.seen).length > 0;
   const update = useAppUpdate();
   const [saving, setSaving] = useState(false);
   const page = pageById(state.pageId);
@@ -91,6 +93,7 @@ export function TopBar({
               <ReloadIcon />
             </RoundButton>
           )}
+          <InstallButton />
           <RoundButton
             label="Rückgängig"
             disabled={!canUndo}

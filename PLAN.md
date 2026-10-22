@@ -63,3 +63,27 @@ Gate: Standard + `/dev/seiten` + Durchlauf in Chromium (Malen → Auspacken → 
 - [ ] Mit Kindern: Geschenke und Sticker verstanden? Melodie zu laut / nervig?
 
 Gate: Spec §9 vollständig abgehakt · Commit: `docs: acceptance on the family tablet`
+
+## Phase 9 — Saisonbilder ✓
+
+- [x] Saison-Engine (reines TS): Zeiträume, Ostern, Schlüssel je Saison und Jahr — getestet
+- [x] Saisonbilder als eigene Chunks (`loadSeasons`), nur in der Saison im Bilderbuch, vorn mit Abzeichen; Ankunft mit der Auspack-Feier
+- [x] Seiten-Check, `/dev/seiten` und Gruppen-Sticker kennen Saisonbilder
+- [x] 12 Saisonbilder (4 Saisons × 3 Gruppen), alle ohne Lecks und über der Mindestgröße
+
+Gate: Standard + `/dev/seiten` + Durchlauf in Chromium (Datum in und außerhalb der Saisons, Neuladen) · Commit: `feat: season pages that come with their season`
+
+## Phase 10 — Farben mischen ✓
+
+- [x] Misch-Engine (reines TS, RYB-Farbkreis) und Fächer — getestet
+- [x] Halten + Ziehen in der Ablage, 4 eigene Fächer ab 5, 7–8 mischt weiter; Fächer in den Einstellungen
+- [x] Sticker „Farbforscher" (1/5/15) und „Bild nur mit eigenen Farben"
+
+Gate: Standard + Durchlauf in Chromium (Tablet, Handy-Reihe mit Touch, Maus, Neuladen) · Commit: `feat: mix your own colours by dragging one blob onto another`
+
+## Phase 11 — Installieren-Knopf ✓
+
+- [x] Icon-Knopf in der Kopfleiste über web-bases `useInstallPrompt`, Halten; iOS: Safari-Schritte als Icons
+
+Gate: Standard + Chromium (Knopf erscheint mit `beforeinstallprompt`) · Commit: `feat: an install button for the app`
+
