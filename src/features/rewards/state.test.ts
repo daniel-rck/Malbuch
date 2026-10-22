@@ -55,4 +55,12 @@ describe("rewardsReducer", () => {
     expect(s.progress.seasons).toEqual(["2026-halloween"]);
     expect(rewardsReducer(s, action)).toBe(s);
   });
+
+  it("counts a mixed colour and celebrates the explorer sticker", () => {
+    const action: RewardsAction = { type: "mixed", color: "#74CE4B", today: "2026-10-22" };
+    const s = rewardsReducer(initialRewards(), action);
+    expect(s.progress.mixed).toEqual(["#74CE4B"]);
+    expect(s.queue).toEqual([{ n: 1, kind: "sticker", id: "farbforscher-1" }]);
+    expect(rewardsReducer(s, action)).toBe(s);
+  });
 });

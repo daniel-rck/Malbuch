@@ -1,4 +1,5 @@
 import type { GroupId } from "../../../pages/groups.ts";
+import { PALETTE } from "../../paint/config.ts";
 import { lastClear, type Op } from "../../paint/engine/ops.ts";
 
 // What the child has done so far (spec §3.3): the facts stickers and surprise
@@ -18,6 +19,8 @@ export type PageStats = {
   erase: boolean;
   /** Finished once with no bucket fill in the picture. */
   penOnly: boolean;
+  /** Finished once with mixed colours only (spec §3.5); missing in older rows. */
+  mixedOnly?: boolean;
 };
 
 export type Progress = {
@@ -32,10 +35,12 @@ export type Progress = {
   seen: string[];
   /** Seasons already announced, as `seasonKey`s like `2026-halloween`. */
   seasons: string[];
+  /** Different colours the child has mixed (spec §3.5). */
+  mixed: string[];
 };
 
 export function emptyProgress(): Progress {
-  return { days: [], pages: {}, earned: {}, fresh: [], seen: [], seasons: [] };
+  return { days: [], pages: {}, earned: {}, fresh: [], seen: [], seasons: [], mixed: [] };
 }
 
 const pad = (n: number) => String(n).padStart(2, "0");
@@ -72,6 +77,17 @@ function hasFill(ops: readonly Op[]): boolean {
   return false;
 }
 
+const PALETTE_COLORS: ReadonlySet<string> = new Set(PALETTE.map((c) => c.color));
+
+/** Whether every colour on the paper since the last clear was mixed by the child. */
+function onlyMixed(ops: readonly Op[]): boolean {
+  for (let i = lastClear(ops) + 1; i < ops.length; i++) {
+    const op = ops[i];
+    if ((op?.t === "stroke" || op?.t === "fill") && PALETTE_COLORS.has(op.color)) return false;
+  }
+  return true;
+}
+
 /** Whether a page was painted on at all (counts for the explorer stickers). */
 export const touched = (s: PageStats | undefined): boolean => !!s && (s.pen || s.fill);
 
@@ -106,6 +122,7 @@ export function record(
   const share = pageProgress(ops, regionCount);
   const best = Math.max(old?.best ?? 0, share);
   const penOnly = (old?.penOnly ?? false) || (share >= FINISHED && !hasFill(ops));
+  const mixedOnly = (old?.mixedOnly ?? false) || (share >= FINISHED && onlyMixed(ops));
   const stats: PageStats = {
     group: page.group,
     best,
@@ -114,6 +131,7 @@ export function record(
     fill,
     erase,
     penOnly,
+    mixedOnly,
   };
   const newDay = painted && !progress.days.includes(today);
   const same =
@@ -124,13 +142,21 @@ export function record(
     old.pen === pen &&
     old.fill === fill &&
     old.erase === erase &&
-    old.penOnly === penOnly;
+    old.penOnly === penOnly &&
+    (old.mixedOnly ?? false) === mixedOnly;
   if (same && !newDay) return progress;
   return {
     ...progress,
     days: newDay ? [...progress.days, today] : progress.days,
     pages: same ? progress.pages : { ...progress.pages, [page.id]: stats },
   };
+}
+
+/** Count a colour mixed in the tray; one mixed before counts once. */
+export function recordMix(progress: Progress, color: string): Progress {
+  return progress.mixed.includes(color)
+    ? progress
+    : { ...progress, mixed: [...progress.mixed, color] };
 }
 
 /** Mark a surprise page as opened. */

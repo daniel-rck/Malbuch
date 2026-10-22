@@ -24,6 +24,7 @@ export type Sticker = {
 const all = (p: Progress): PageStats[] => Object.values(p.pages);
 const finished = (p: Progress) => all(p).filter((s) => s.best >= FINISHED).length;
 const days = (p: Progress) => p.days.length;
+const mixed = (p: Progress) => p.mixed.length;
 const surprisesPainted = (p: Progress, pages: Pages) =>
   pages.filter((m) => m.unlockDay !== undefined && touched(p.pages[m.id]));
 
@@ -94,6 +95,22 @@ export const STICKERS: readonly Sticker[] = [
       const used = new Set(all(p).flatMap((s) => s.colors));
       return PALETTE.filter((c) => used.has(c.color)).length;
     },
+  },
+  { id: "farbforscher-1", kind: "werkzeug", label: "Eine Farbe gemischt", goal: 1, count: mixed },
+  { id: "farbforscher-5", kind: "werkzeug", label: "Fünf Farben gemischt", goal: 5, count: mixed },
+  {
+    id: "farbforscher-15",
+    kind: "werkzeug",
+    label: "Fünfzehn Farben gemischt",
+    goal: 15,
+    count: mixed,
+  },
+  {
+    id: "eigene-farben",
+    kind: "werkzeug",
+    label: "Ein Bild nur mit eigenen Farben gemalt",
+    goal: 1,
+    count: (p) => all(p).filter((s) => s.mixedOnly).length,
   },
   // Days
   { id: "tage-3", kind: "tage", label: "An drei Tagen gemalt", goal: 3, count: days },

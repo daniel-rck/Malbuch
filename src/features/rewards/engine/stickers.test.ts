@@ -75,6 +75,21 @@ describe("the sticker catalogue", () => {
     expect(count("alle-farben", p)).toBe(9);
   });
 
+  it("counts mixed colours and pictures painted in them alone", () => {
+    const p = progress({
+      mixed: ["#000001", "#000002", "#000003", "#000004", "#000005"],
+      pages: { a: stats({ mixedOnly: true, colors: ["#000001"] }) },
+    });
+    expect(count("farbforscher-1", p)).toBe(5);
+    expect(award(p, pages, "d").won.map((s) => s.id)).toEqual([
+      "farbforscher-1",
+      "farbforscher-5",
+      "eigene-farben",
+    ]);
+    // Mixed colours count for a colourful picture, not for all sixteen.
+    expect(count("alle-farben", p)).toBe(0);
+  });
+
   it("counts days, weekdays and weekends", () => {
     // Fri 23, Sat 24, Sun 25 Oct 2026, and Sat 31.
     const p = progress({ days: ["2026-10-23", "2026-10-24", "2026-10-25", "2026-10-31"] });

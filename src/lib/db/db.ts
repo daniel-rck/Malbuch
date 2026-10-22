@@ -60,7 +60,15 @@ export type LabelsRecord = {
   areas: Int32Array;
 };
 
-export type Settings = { id: "settings"; tool: Tool; color: string; size: number; pageId: string };
+export type Settings = {
+  id: "settings";
+  tool: Tool;
+  color: string;
+  size: number;
+  pageId: string;
+  /** Mixed colours in the tray, newest first (spec §3.5); missing before mixing came. */
+  mixes?: string[];
+};
 
 /** Stickers, painting days and opened surprise pages (spec §3.2–3.3), one row. */
 export type ProgressRecord = Progress & { id: "progress" };

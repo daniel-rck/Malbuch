@@ -40,6 +40,7 @@ Eltern nur für „Bild speichern".
 | Überraschungsbilder | Jeder Maltag packt neue Bilder aus (§3.2); noch verpackte sind Geschenke im Bilderbuch |
 | Stickerheft | Stern-Knopf neben dem Bilderbuch; gewonnene Sticker mit Konfetti und kurzer Melodie (§3.3) |
 | Saisonbilder | Ostern, Sommer, Halloween, Weihnachten: je Gruppe ein Bild, nur während der Saison im Bilderbuch (§3.4) |
+| Farben mischen | Ab 5: einen Klecks gedrückt halten und auf einen anderen ziehen → neue Farbe in einem von 4 eigenen Fächern (§3.5) |
 | PWA | Installierbar, vollständig offline, Fullscreen, kein Pinch-Zoom/Scroll-Bounce |
 
 ### 3.1 Altersgruppen
@@ -49,11 +50,11 @@ Die Gruppe bestimmt, welche Bilder zusammen im Bilderbuch stehen, und was die Ab
 Profil. Passt die gewählte Farbe/Größe nicht zur Gruppe, gilt der Gruppen-Default.
 Quelle: `src/pages/groups.ts`.
 
-| Gruppe | Reiter-Icon | Farben | Größen | Default |
-|---|---|---|---|---|
-| `klein` · 3–4 Jahre | kleine Figur | 10 (Rot, Orange, Gelb, Grün, Blau, Lila, Rosa, beide Hauttöne, Braun) | 30 / 52 | 52 |
-| `mittel` · 5–6 Jahre | mittlere Figur | alle 16 | 16 / 30 / 52 | 30 |
-| `gross` · 7–8 Jahre | große Figur | alle 16 | 8 / 16 / 30 / 52 | 16 |
+| Gruppe | Reiter-Icon | Farben | Größen | Default | Mischen (§3.5) |
+|---|---|---|---|---|---|
+| `klein` · 3–4 Jahre | kleine Figur | 10 (Rot, Orange, Gelb, Grün, Blau, Lila, Rosa, beide Hauttöne, Braun) | 30 / 52 | 52 | — |
+| `mittel` · 5–6 Jahre | mittlere Figur | alle 16 | 16 / 30 / 52 | 30 | Grundfarben |
+| `gross` · 7–8 Jahre | große Figur | alle 16 | 8 / 16 / 30 / 52 | 16 | auch Gemischtes weiter |
 
 ### 3.2 Überraschungsbilder
 
@@ -71,13 +72,13 @@ Kalendertage, eine Woche Pause kostet also nichts. Der allererste Strich packt T
 
 ### 3.3 Sticker
 
-22 Sticker in vier Reihen (`src/features/rewards/engine/stickers.ts`), jeder ein Bild ohne
+26 Sticker in vier Reihen (`src/features/rewards/engine/stickers.ts`), jeder ein Bild ohne
 Text; Stufen einer Serie zeigen goldene Sterne:
 
 | Reihe | Sticker |
 |---|---|
 | Bilder | 1 / 5 / 10 / 25 Bilder fertig · ein Bild ganz ausgemalt · alle Bilder einer Altersgruppe (×3, ohne Saisonbilder) |
-| Stifte und Farben | Stift, Farbeimer und Radierer ausprobiert · ein Bild nur mit dem Stift · 8 Farben in einem Bild · alle 16 Farben |
+| Stifte und Farben | Stift, Farbeimer und Radierer ausprobiert · ein Bild nur mit dem Stift · 8 Farben in einem Bild (Gemischte zählen mit) · alle 16 Farben · 1 / 5 / 15 Farben gemischt · ein Bild nur mit eigenen Farben |
 | Maltage | 3 / 7 / 14 Maltage · an jedem Wochentag · Samstag und Sonntag |
 | Entdecken | alle drei Altersgruppen · ein Überraschungsbild gemalt · alle Überraschungen ausgepackt · aus jeder Überraschung eins |
 
@@ -118,6 +119,26 @@ erst der nächste Start öffnet das erste Bild.
 - Saisonbilder zählen als Bilder (Fertig-Sticker), aber nicht zu „alle Bilder einer
   Altersgruppe" — die wären sonst erst nach einem Jahr zu schaffen.
 
+### 3.5 Farben mischen
+
+Ab 5 Jahren liegen hinter den 16 Farben **4 eigene Fächer** (leer: gestrichelter Umriss).
+
+- **Geste:** einen Klecks **0,25 s gedrückt halten** — er hebt sich und folgt dem Finger —, dann
+  auf einen anderen Klecks ziehen und loslassen. Das Ziel bekommt den Sonnenring. Vor dem
+  Anheben bleibt Tippen = Farbe wählen und Wischen = die Handy-Reihe scrollen; danach hält ein
+  nicht-passiver `touchmove`-Listener die Reihe still. Eine Maus zieht ohne Warten.
+  Daneben loslassen: nichts passiert. Kein Tastatur-Weg (die 16 Farben bleiben ja wählbar).
+- **Ergebnis:** die Mischung springt ins vorderste Fach (neueste vorn, die älteste fällt bei der
+  fünften raus), ist sofort gewählt, ein kurzer Zwei-Ton-Klang. Schon da → nach vorn; gleich einer
+  Palettenfarbe → kein Fach. 5–6 mischt nur die 16 Farben, 7–8 auch die eigenen weiter.
+- **Wie gemischt wird** (`src/features/paint/engine/mix.ts`, reines TS): wie Farbe im
+  Malkasten, über den Rot-Gelb-Blau-Farbkreis (RGB → RYB, Mittel, RYB → RGB): Blau + Gelb =
+  Grün, Rot + Blau = Lila, + Weiß = heller. Die Mischung wird halb zur Helligkeit der beiden
+  Eltern angehoben (sonst wird Rot + Gelb braun).
+- Die Fächer wandern mit den Einstellungen (`settings.mixes`); 3–4 sehen sie nicht, eine
+  gemischte Farbe fällt dort auf den Gruppen-Default zurück. Ops speichern Farben ohnehin als
+  Hex → Undo, Replay und Export brauchen nichts Neues.
+
 ### Später (nicht im MVP)
 
 Stempel · Glitzer- und Regenbogenstift · Zeitraffer-Replay des Malprozesses
@@ -148,6 +169,7 @@ src/
       regions.ts     labelRegions(), regionAt()
       mask.ts        buildMask(): Fläche + Linien bis DILATE Schritte (BFS)
       ops.ts         Operation-Typen, Rundung, Digest
+      mix.ts         Farben mischen (RYB), Fächer
       replay-plan.ts planReplay(): Startzustand + abzuspielende Ops
       input.ts       Ein-Pointer-Regel
       rle.ts hash.ts stats.ts
@@ -251,8 +273,8 @@ IndexedDB `malbuch` (`src/lib/db/db.ts`), Bilder als PNG-`ArrayBuffer`:
 | `previews` | `{ id, labelsKey, png, opCount, digest }`: Malschicht in voller Größe; als Snapshot nur gültig für dieselben Labels | nach 3 s Pause, bei Seitenwechsel, Bilderbuch und `visibilitychange: hidden`; beim Öffnen ohne passende Vorschau nach 3 s |
 | `thumbs` | `{ id, thumb, digest }`: Thumbnail fürs Bilderbuch (seit DB v2; das Bilderbuch lädt keine Vollbilder) | mit der Vorschau, in einer Transaktion |
 | `labels` | Labels RLE-kodiert + Boxen, Schlüssel `<seite>:<svg-hash>:v<schema>:s<scale>` | einmal pro Zeichnung |
-| `settings` | Werkzeug, Farbe, Größe, letzte Seite | 300 ms nach Änderung |
-| `progress` | eine Zeile: Maltage, je Seite bester Flächenanteil/Farben/Werkzeuge, Sticker (`earned`, `fresh`), geöffnete Überraschungs- und Saisonbilder, angekündigte Saisons (seit DB v3; neue Felder werden beim Lesen mit Defaults ergänzt) | 300 ms nach Änderung, bei `visibilitychange: hidden` |
+| `settings` | Werkzeug, Farbe, Größe, letzte Seite, gemischte Farben (`mixes`, fehlt in alten Zeilen) | 300 ms nach Änderung |
+| `progress` | eine Zeile: Maltage, je Seite bester Flächenanteil/Farben/Werkzeuge, Sticker (`earned`, `fresh`), geöffnete Überraschungs- und Saisonbilder, angekündigte Saisons, gemischte Farben (seit DB v3; neue Felder werden beim Lesen mit Defaults ergänzt) | 300 ms nach Änderung, bei `visibilitychange: hidden` |
 
 - **Schneller Start:** der Snapshot wird nur gezeichnet, wenn sein `digest` dem der ersten
   `opCount` Ops entspricht (die Länge allein reicht nicht: Undo + neuer Strich = gleiche Länge);
@@ -429,5 +451,9 @@ Mit ✓ markiert: automatisiert in Chromium geprüft (Playwright, 2026-10-20).
   der Saison** sichtbar (Wunsch): danach verschwinden sie, Gemaltes bleibt und kommt mit der
   Saison wieder. Eigene Chunks statt Bundle — das ist das „Nachladen"; ein Seitenpaket vom Server
   bräuchte Laufzeit-Caching und bleibt offen (§10).
+- _2026-10-22_ — Farben mischen per Halten + Ziehen (Wunsch), 4 Fächer ab 5, 7–8 mischt auch
+  Gemischtes weiter. RYB-Farbkreis statt Kubelka-Munk: KM (ein Pigment-Parameter) machte Rot +
+  Blau grau-türkis und Weiß kaum heller — Kinder erwarten Lila und Rosa. Halten statt sofort
+  Ziehen, weil die Handy-Reihe seitlich scrollt.
 - _2026-10-20_ — Spec bleibt Deutsch (web-base empfiehlt Englisch für `docs/specs/`; in
   web-base 08 als Abweichung vermerkt).

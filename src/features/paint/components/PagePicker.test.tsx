@@ -43,7 +43,7 @@ describe("PagePicker", () => {
       <PagePicker thumbs={new Map()} onPick={() => {}} />,
       "drache",
       {},
-      ["halloween"],
+      { seasons: ["halloween"] },
     );
     expect(pageNames()[0]).toBe("Gespenst und Kürbisse, neu");
     unmount();

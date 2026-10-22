@@ -2,7 +2,7 @@ import { createContext, useContext } from "react";
 import type { GroupId } from "../../pages/groups.ts";
 import { PAGE_META } from "../../pages/meta.ts";
 import type { Op } from "../paint/engine/ops.ts";
-import { emptyProgress, markSeen, type Progress, record } from "./engine/progress.ts";
+import { emptyProgress, markSeen, type Progress, record, recordMix } from "./engine/progress.ts";
 import { award } from "./engine/stickers.ts";
 import { newlyUnlocked, unlockLevel } from "./engine/unlock.ts";
 
@@ -33,6 +33,7 @@ export type RewardsAction =
       today: string;
     }
   | { type: "seen"; pageId: string }
+  | { type: "mixed"; color: string; today: string }
   /** A season is on: announced with its pages, once per season and year. */
   | { type: "season"; key: string; pages: string[] }
   | { type: "book"; open: boolean }
@@ -57,6 +58,17 @@ export function rewardsReducer(state: RewardsState, action: RewardsAction): Rewa
       let n = state.next;
       if (opened.length > 0) queue.push({ n: n++, kind: "unlock", pages: opened.map((p) => p.id) });
       for (const s of won) queue.push({ n: n++, kind: "sticker", id: s.id });
+      return { ...state, progress, queue, next: n };
+    }
+    case "mixed": {
+      const after = recordMix(state.progress, action.color);
+      if (after === state.progress) return state;
+      const { progress, won } = award(after, PAGE_META, action.today);
+      let n = state.next;
+      const queue: Celebration[] = [
+        ...state.queue,
+        ...won.map((s) => ({ n: n++, kind: "sticker" as const, id: s.id })),
+      ];
       return { ...state, progress, queue, next: n };
     }
     case "seen": {

@@ -120,10 +120,11 @@ export function PaintPage() {
         color: state.color,
         size: state.size,
         pageId: state.pageId,
+        mixes: [...state.mixes],
       });
     }, 300);
     return () => clearTimeout(timer);
-  }, [restored, state.tool, state.color, state.size, state.pageId]);
+  }, [restored, state.tool, state.color, state.size, state.pageId, state.mixes]);
 
   useSaveRewards(rewards.progress, restored);
   useTrackRewards(session, dispatchRewards);

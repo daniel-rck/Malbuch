@@ -31,12 +31,19 @@ export function primeSound(): () => void {
 const STICKER = [523.25, 659.25, 783.99, 1046.5];
 /** A sparkle for a surprise page: G – C – E – G – C, quicker. */
 const UNLOCK = [783.99, 1046.5, 1318.5, 1568, 2093];
+/** Two colours running together (spec §3.5): a soft E – A blip. */
+const MIX = [659.25, 880];
 
-export function playJingle(kind: "sticker" | "unlock" = "sticker"): void {
+const TUNES = {
+  sticker: { notes: STICKER, step: 0.12 },
+  unlock: { notes: UNLOCK, step: 0.09 },
+  mix: { notes: MIX, step: 0.08 },
+};
+
+export function playJingle(kind: keyof typeof TUNES = "sticker"): void {
   const ctx = audio();
   if (!ctx || ctx.state !== "running") return;
-  const notes = kind === "unlock" ? UNLOCK : STICKER;
-  const step = kind === "unlock" ? 0.09 : 0.12;
+  const { notes, step } = TUNES[kind];
   const start = ctx.currentTime + 0.02;
   const out = ctx.createGain();
   out.gain.value = 0.18;

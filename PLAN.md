@@ -72,3 +72,11 @@ Gate: Spec §9 vollständig abgehakt · Commit: `docs: acceptance on the family 
 - [x] 12 Saisonbilder (4 Saisons × 3 Gruppen), alle ohne Lecks und über der Mindestgröße
 
 Gate: Standard + `/dev/seiten` + Durchlauf in Chromium (Datum in und außerhalb der Saisons, Neuladen) · Commit: `feat: season pages that come with their season`
+
+## Phase 10 — Farben mischen ✓
+
+- [x] Misch-Engine (reines TS, RYB-Farbkreis) und Fächer — getestet
+- [x] Halten + Ziehen in der Ablage, 4 eigene Fächer ab 5, 7–8 mischt weiter; Fächer in den Einstellungen
+- [x] Sticker „Farbforscher" (1/5/15) und „Bild nur mit eigenen Farben"
+
+Gate: Standard + Durchlauf in Chromium (Tablet, Handy-Reihe mit Touch, Maus, Neuladen) · Commit: `feat: mix your own colours by dragging one blob onto another`
